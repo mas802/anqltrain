@@ -9,11 +9,11 @@ raspberry pi, bluetooth, leds, wires, node js, quarkus, web components, ...
 
 ### 2020
 
-[![Watch the video](https://img.youtube.com/vi/FY5u5JM94pQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=FY5u5JM94pQ)
+[![Watch the video](https://img.youtube.com/vi/FY5u5JM94pQ/mqdefault.jpg)](https://www.youtube.com/watch?v=FY5u5JM94pQ)
 
 ### 2022
 
-[![Watch the video](https://img.youtube.com/vi/_tesSt7-NaM/maxresdefault.jpg)](https://youtu.be/_tesSt7-NaM)
+[![Watch the video](https://img.youtube.com/vi/_tesSt7-NaM/mqdefault.jpg)](https://youtu.be/_tesSt7-NaM)
 
 ## Links and credits
 
