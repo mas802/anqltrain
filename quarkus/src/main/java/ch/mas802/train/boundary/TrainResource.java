@@ -1,6 +1,7 @@
 package ch.mas802.train.boundary;
 
 import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,11 +13,11 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.inject.Inject;
 import ch.mas802.train.entity.Status;
 import ch.mas802.train.entity.Result;
 import java.util.List;
 import java.util.Map;
+import java.time.Instant;
 
 import ch.mas802.train.control.WsService;
 
@@ -28,9 +29,15 @@ public class TrainResource {
 
     List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA");
 
+    private static final long TOKEN_MAX_AGE_SECONDS = 10 * 60;
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Status toggle(@QueryParam(value="key") String key) {
+    public Status toggle(@QueryParam(value="key") String key,
+                         @QueryParam(value="token") String token) {
+        if (isTokenExpired(token)) {
+            return youtubeStatus();
+        }
 //        if (key.length() > 10 || !"".equals(key.replaceAll("^[A-Z]", ""))) return null;
         if (alwaysOnList.contains(key)) {
             return new Status("ON", 0, 0);
@@ -42,7 +49,11 @@ public class TrainResource {
     @Path("/info")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Status info(@QueryParam(value="key") String key) {
+    public Status info(@QueryParam(value="key") String key,
+                       @QueryParam(value="token") String token) {
+        if (isTokenExpired(token)) {
+            return youtubeStatus();
+        }
 //        if (key.length() > 10 || !"".equals(key.replaceAll("^[A-Z]", ""))) return null;
         if (alwaysOnList.contains(key)) {
             return  new Status("ON", 0, 0);
@@ -82,5 +93,22 @@ public class TrainResource {
 
         wsService.broadcast(sanitizedPayload);
         return new Result(true, 200, "command sent");
+    }
+
+    private boolean isTokenExpired(String token) {
+        if (token == null) {
+            return true;
+        }
+        try {
+            long tokenEpoch = Long.parseLong(token);
+            long nowEpoch = Instant.now().getEpochSecond();
+            return (nowEpoch - tokenEpoch) > TOKEN_MAX_AGE_SECONDS;
+        } catch (NumberFormatException e) {
+            return true;
+        }
+    }
+
+    private Status youtubeStatus() {
+        return new Status("YOUTUBE", 10000, 10000);
     }
 }
