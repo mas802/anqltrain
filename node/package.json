@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "i2c-bus": "^5.2.3",
+    "node-poweredup": "^9.0.0",
+    "pm2": "^5.4.2",
+    "websocket": "^1.0.35"
+  }
+}
