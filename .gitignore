@@ -36,3 +36,4 @@ sh/*.log
 quarkus/src/main/resources/META-INF/resources/*.html
 !quarkus/src/main/resources/META-INF/resources/index.html
 quarkus/target/classes/
+quarkus/src/main/resources/META-INF/resources/plan_cam.jpg
