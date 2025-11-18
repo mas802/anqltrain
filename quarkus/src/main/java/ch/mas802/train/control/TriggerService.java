@@ -1,18 +1,37 @@
 package ch.mas802.train.control;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
+
+import ch.mas802.train.entity.Status;
 
 @ApplicationScoped
 public class TriggerService {
 
+    private static final long[] DECEMBER_2025_DAY_STARTS = new long[25];
+
+    static {
+        for (int day = 1; day <= 24; day++) {
+            DECEMBER_2025_DAY_STARTS[day] = LocalDate.of(2025, Month.DECEMBER, day)
+                    .atStartOfDay(ZoneOffset.UTC)
+                    .toEpochSecond();
+        }
+    }
+
     Map<String, String> triggers = new ConcurrentHashMap<>();
+    Map<String, AdventEntry> adventGrid = new HashMap<>();
     
     public TriggerService() {
         initialize();
+        initializeAdventGrid();
     }
 
     public Optional<String> handleTrigger(String trigger) {
@@ -36,6 +55,10 @@ public class TriggerService {
     
     public void clearTriggers() {
         triggers.clear();
+    }
+
+    public Map<String, AdventEntry> getAdventGrid() {
+        return Collections.unmodifiableMap(adventGrid);
     }
     
     public void initialize() {
@@ -65,4 +88,71 @@ public class TriggerService {
         System.out.println("Initialized " + triggers.size() + " triggers");
     }
 
+    private void initializeAdventGrid() {
+        addAdventEntry("SWITCHBACK", 6, "SWITCHBACK");
+        addAdventEntry("SWITCHFRONT", 2, "SWITCHFRONT");
+        addAdventEntry("DECOUPLERBACK", 3, "DECOUPLERBACK");
+        addAdventEntry("DECOUPLERFRONT", 4, "DECOUPLERFRONT");
+
+        addAdventEntry("LOADER", 5, "LOADER");
+        addAdventEntry("ALLOFF", 1, "ALLOFF");
+        addAdventEntry("RED", 7, "RED");
+        addAdventEntry("CROSSING", 8, "CROSSING");
+
+        addAdventEntry("HOUSE", 9, "HOUSE");
+        addAdventEntry("HOUSE1", 10, "HOUSE1");
+        addAdventEntry("HOUSE2", 11, "HOUSE2");
+        addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
+
+        addAdventEntry("TRACK", 13, "TRACK");
+        addAdventEntry("GHOSTBUSTERS", 14, "GHOSTBUSTERS");
+        addAdventEntry("FIRE", 15, "FIRE");
+        addAdventEntry("CONVEYOR", 16, "CONVEYOR");
+
+        addAdventEntry("MONSTER", 17, "MONSTER");
+        addAdventEntry("CAVE", 18, "CAVE");
+        addAdventEntry("GUGGE", 19, "GUGGE");
+        addAdventEntry("DRAGON", 20, "DRAGON");
+
+        addAdventEntry("SIGNAL1", 21, "SIGNAL1");
+        addAdventEntry("SIGNAL2", 22, "SIGNAL2");
+        addAdventEntry("SANTA", 23, "SANTA");
+        addAdventEntry("ALLON", 24, "ALLON");
+    }
+
+    private void addAdventEntry(String key, int day, String action) {
+        adventGrid.put(key, new AdventEntry(day, action));
+    }
+
+    public Status buildAdventStatus(String key, long epochSecond) {
+        AdventEntry event = adventGrid.get(key);
+        if (event == null) {
+            return null;
+        }
+        long eventStartEpochSecond = DECEMBER_2025_DAY_STARTS[event.day()];
+        if (epochSecond > eventStartEpochSecond) {
+            return null;
+        }
+        System.out.println("Advent event " + key + " at " + epochSecond);
+        String adventState = String.format("ADVENT_%02d", event.day());
+        return new Status(adventState, 10000, 2000);
+    }
+
+    public static final class AdventEntry {
+        private final int day;
+        private final String action;
+
+        public AdventEntry(int day, String action) {
+            this.day = day;
+            this.action = action;
+        }
+
+        public int day() {
+            return day;
+        }
+
+        public String action() {
+            return action;
+        }
+    }
 }

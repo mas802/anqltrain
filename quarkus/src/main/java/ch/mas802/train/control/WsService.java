@@ -4,12 +4,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.websocket.Session;
 
-import javax.inject.Inject;
-
-import ch.mas802.train.entity.StatusRepository;
 import ch.mas802.train.entity.Status;
+import ch.mas802.train.entity.StatusRepository;
 
 @ApplicationScoped
 public class WsService {
@@ -79,6 +78,11 @@ public class WsService {
     public Status triggerOrToggle(final String key) {
         Status status = statusRepository.getStatus(key);
         long until = 500;
+
+        Status adventStatus = triggerService.buildAdventStatus(key, System.currentTimeMillis());
+        if (adventStatus != null) {
+            return adventStatus;
+        }
 
         System.out.println("triggerOrToggle: " + key + " - " + status.state);
     

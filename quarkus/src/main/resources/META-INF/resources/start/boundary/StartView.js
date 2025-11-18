@@ -114,8 +114,12 @@ img {
 
   update() {
     this.buttonStart.hidden = false;
-    this.buttonStart.src=`/imgs/${this.label}_${this.state}.jpg`;
-    this.labelStart.textContent = `${this.label}:${this.state}`;
+    const isAdventState = this.state.startsWith('ADVENT_');
+    const imagePath = isAdventState
+      ? `/imgs/${this.state}.jpg`
+      : `/imgs/${this.label}_${this.state}.jpg`;
+    this.buttonStart.src = imagePath;
+    this.labelStart.textContent = isAdventState ? this.state : `${this.label}:${this.state}`;
   }
 
   handleImageError() {

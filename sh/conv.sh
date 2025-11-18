@@ -2,9 +2,6 @@
 SRC_IMG_DIR="../pics/src"
 IMG_DIR="../quarkus/src/main/resources/META-INF/resources/imgs"
 
-magick \( logo: -resize 50% -modulate 100,0  \) \( ${SRC_IMG_DIR}/Icon_Simple_Warn.png -resize 40% -fill red -tint 100 \) \
--gravity northwest -geometry +40+40 -compose over -composite tmp.png
-
 #magick ${SRC_IMG_DIR}/github.png  -rotate 12  -resize 500x -crop 300x60+0+20  ${IMG_DIR}/github.jpg
 magick ${SRC_IMG_DIR}/youtube.png -rotate -20 -resize 1600x -crop 300x225+9+260 ${IMG_DIR}/youtube.jpg
 
@@ -208,3 +205,23 @@ magick -size 300x225 xc:#822 ${IMG_DIR}/NONE_failed.jpg
 montage ${IMG_DIR}/HOUSE_ON.jpg ${IMG_DIR}/HOUSE1_OFF.jpg ${IMG_DIR}/HOUSE2_ON.jpg ${IMG_DIR}/TRACK_OFF.jpg -geometry +0+0 ${IMG_DIR}/ALLLIGHTS_ON.jpg
 montage ${IMG_DIR}/HOUSE_OFF.jpg ${IMG_DIR}/HOUSE1_ON.jpg ${IMG_DIR}/HOUSE2_OFF.jpg ${IMG_DIR}/TRACK_ON.jpg -geometry +0+0 ${IMG_DIR}/ALLLIGHTS_OFF.jpg
 common_pics ALLLIGHTS
+
+# Advent calendar tiles with red background, serif numbers and golden border
+ADVENT_BG_COLOR="#8b0000"
+ADVENT_TEXT_COLOR="#ffd700"
+ADVENT_STROKE_COLOR="#b8860b"
+ADVENT_FRAME_COLOR="#ffd700"
+ADVENT_FONT="Times-Bold"
+
+for day in $(seq 1 24); do
+  number=$(printf "%d" "${day}")
+  outfile=$(printf "%s/ADVENT_%02d.jpg" "${IMG_DIR}" "${day}")
+  magick -size 300x225 xc:${ADVENT_BG_COLOR} \
+    -fill none -stroke "${ADVENT_FRAME_COLOR}" -strokewidth 8 \
+    -draw "rectangle 12,12 288,213" \
+    \( -background none -font "${ADVENT_FONT}" -pointsize 150 \
+       -fill "${ADVENT_TEXT_COLOR}" -stroke "${ADVENT_STROKE_COLOR}" -strokewidth 3 \
+       -gravity center -kerning 10 -size 260x200 caption:"${number}" \) \
+    -gravity center -geometry +0+12 -compose over -composite \
+    "${outfile}"
+done

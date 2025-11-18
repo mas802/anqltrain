@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.time.Instant;
 
+import ch.mas802.train.control.TriggerService;
 import ch.mas802.train.control.WsService;
 
 @Path("/train")
@@ -26,6 +27,9 @@ public class TrainResource {
 
     @Inject
     WsService wsService;
+    
+    @Inject
+    TriggerService triggerService;
 
     List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA");
 
@@ -35,6 +39,12 @@ public class TrainResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Status toggle(@QueryParam(value="key") String key,
                          @QueryParam(value="token") String token) {
+
+        Status adventStatus = triggerService.buildAdventStatus(key, epochFromTokenOrNow(token));
+        if (adventStatus != null) {
+            return adventStatus;
+        }
+
         if (isTokenExpired(token)) {
             return youtubeStatus();
         }
@@ -51,6 +61,12 @@ public class TrainResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Status info(@QueryParam(value="key") String key,
                        @QueryParam(value="token") String token) {
+
+        Status adventStatus = triggerService.buildAdventStatus(key, epochFromTokenOrNow(token));
+        if (adventStatus != null) {
+            return adventStatus;
+        }
+
         if (isTokenExpired(token)) {
             return youtubeStatus();
         }
@@ -110,5 +126,16 @@ public class TrainResource {
 
     private Status youtubeStatus() {
         return new Status("YOUTUBE", 10000, 10000);
+    }
+
+    private long epochFromTokenOrNow(String token) {
+        if (token == null) {
+            return Instant.now().getEpochSecond();
+        }
+        try {
+            return Long.parseLong(token);
+        } catch (NumberFormatException e) {
+            return Instant.now().getEpochSecond();
+        }
     }
 }
