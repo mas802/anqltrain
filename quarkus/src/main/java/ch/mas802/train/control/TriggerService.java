@@ -89,35 +89,35 @@ public class TriggerService {
     }
 
     private void initializeAdventGrid() {
-        addAdventEntry("SWITCHBACK", 6, "SWITCHBACK");
+        addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
         addAdventEntry("SWITCHFRONT", 2, "SWITCHFRONT");
-        addAdventEntry("DECOUPLERBACK", 3, "DECOUPLERBACK");
+        addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
         addAdventEntry("DECOUPLERFRONT", 4, "DECOUPLERFRONT");
 
-        addAdventEntry("LOADER", 5, "LOADER");
+        addAdventEntry("LOADER", 3, "LOADER");
         addAdventEntry("ALLOFF", 1, "ALLOFF");
         addAdventEntry("RED", 7, "RED");
-        addAdventEntry("CROSSING", 8, "CROSSING");
+        addAdventEntry("CROSSING", 13, "CROSSING");
 
-        addAdventEntry("HOUSE", 9, "HOUSE");
+        addAdventEntry("HOUSE", 20, "HOUSE");
         addAdventEntry("HOUSE1", 10, "HOUSE1");
-        addAdventEntry("HOUSE2", 11, "HOUSE2");
+        addAdventEntry("HOUSE2", 22, "HOUSE2");
         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
 
-        addAdventEntry("TRACK", 13, "TRACK");
-        addAdventEntry("GHOSTBUSTERS", 14, "GHOSTBUSTERS");
+        addAdventEntry("TRACK", 8, "TRACK");
+        addAdventEntry("GHOSTBUSTERS", 18, "GHOSTBUSTERS");
         addAdventEntry("FIRE", 15, "FIRE");
-        addAdventEntry("CONVEYOR", 16, "CONVEYOR");
+        addAdventEntry("CONVEYOR", 23, "CONVEYOR");
 
         addAdventEntry("MONSTER", 17, "MONSTER");
-        addAdventEntry("CAVE", 18, "CAVE");
+        addAdventEntry("CAVE", 5, "CAVE");
         addAdventEntry("GUGGE", 19, "GUGGE");
-        addAdventEntry("DRAGON", 20, "DRAGON");
+        addAdventEntry("DRAGON", 9, "DRAGON");
 
         addAdventEntry("SIGNAL1", 21, "SIGNAL1");
-        addAdventEntry("SIGNAL2", 22, "SIGNAL2");
-        addAdventEntry("SANTA", 23, "SANTA");
-        addAdventEntry("ALLON", 24, "ALLON");
+        addAdventEntry("SIGNAL2", 11, "SIGNAL2");
+        addAdventEntry("SANTA", 6, "SANTA");
+        addAdventEntry("ALLON", 16, "ALLON");
     }
 
     private void addAdventEntry(String key, int day, String action) {

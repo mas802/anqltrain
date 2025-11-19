@@ -9,7 +9,7 @@ magick  ${SRC_IMG_DIR}/Icon_Simple_Warn.png -resize 40% ${SRC_IMG_DIR}/Icon_Simp
 
 ERRORICON="( ${SRC_IMG_DIR}/Icon_Simple_Warn.png -resize 40%  -fill red -tint 100 ) -gravity northeast -geometry +20+20 -compose over -composite"
 FAILEDICON="( ${SRC_IMG_DIR}/Icon_Simple_Warn.png -resize 40% ) -gravity northeast -geometry +20+20 -compose over -composite"
-YOUTUBEICON="( ${SRC_IMG_DIR}/Youtube_logo.png -resize 8% -alpha Set -channel A -evaluate set 80% +channel ) -gravity northeast -geometry +20+20 -compose over -composite"
+YOUTUBEICON="( ${SRC_IMG_DIR}/Youtube_logo.png -resize 8% -alpha Set -channel A -evaluate set 70% +channel ) -gravity northeast -geometry +20+20 -compose over -composite"
 
 function common_pics () {
   magick ${IMG_DIR}/${1}_OFF.jpg -modulate 100,0 ${IMG_DIR}/${1}_load.jpg
@@ -148,24 +148,24 @@ magick ${SRC_IMG_DIR}/IMG_9474.jpg -resize x225 -crop 300x225+0+120 ${IMG_DIR}/W
 magick ${SRC_IMG_DIR}/IMG_9475.jpg -resize x225 -crop 300x225+0+120 ${IMG_DIR}/WARN_OFF.jpg
 common_pics WARN
 
-magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/SWITCH_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/SWITCH_OFF.jpg
+magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/SWITCH_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/SWITCH_OFF.jpg
 common_pics SWITCH
 
-magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/SWITCHFRONT_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/SWITCHFRONT_OFF.jpg
+magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/SWITCHFRONT_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/SWITCHFRONT_OFF.jpg
 common_pics SWITCHFRONT
 
-magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/SWITCHBACK_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/SWITCHBACK_OFF.jpg
+magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/SWITCHBACK_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/SWITCHBACK_OFF.jpg
 common_pics SWITCHBACK
 
-magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/DECOUPLER_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/DECOUPLER_OFF.jpg
+magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/DECOUPLER_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x225+6+80 ${IMG_DIR}/DECOUPLER_OFF.jpg
 common_pics DECOUPLER
 
-magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/DECOUPLERBACK_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x225+60+80 ${IMG_DIR}/DECOUPLERBACK_OFF.jpg
+magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/DECOUPLERBACK_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/DECOUPLERBACK_OFF.jpg
 common_pics DECOUPLERBACK
 
 magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x225+0+80 ${IMG_DIR}/DECOUPLERFRONT_ON.jpg

@@ -19,17 +19,61 @@
     </div>
     <div style="opacity:0.8;">bis zum Apero am 07.12.2025, 18:00 Uhr</div>
     <div style="opacity:0.8;">Marktgasse 42, Rheinfelden</div>
+   <div style="opacity:0.8;"></div>
   </div>
+  <!-- TODO should read the following grid from the AdventGrid -->
+
+  <div class="box forth1"><xmas-start data-label="SWITCHBACK"></xmas-start></div>
+  <div class="box forth2"><xmas-start data-label="SWITCHFRONT"></xmas-start></div>
+  <div class="box forth3"><xmas-start data-label="DECOUPLERBACK"></xmas-start></div>
+  <div class="box forth4"><xmas-start data-label="DECOUPLERFRONT"></xmas-start></div>
+
+  <div class="box forth1"><xmas-start data-label="LOADER"></xmas-start></div>
+  <div class="box forth2"><xmas-start data-label="ALLOFF"></xmas-start></div>
+  <div class="box forth3"><xmas-start data-label="RED"></xmas-start></div>
+  <div class="box forth4"><xmas-start data-label="CROSSING"></xmas-start></div>
+
+  <div class="box forth1"><xmas-start data-label="HOUSE"></xmas-start></div>
+  <div class="box forth2"><xmas-start data-label="HOUSE1"></xmas-start></div>
+  <div class="box forth3"><xmas-start data-label="HOUSE2"></xmas-start></div>
+  <div class="box forth4"><xmas-start data-label="ALLLIGHTS"></xmas-start></div>
+
+  <div class="box forth1"><xmas-start data-label="TRACK"></xmas-start></div>
+  <div class="box forth2"><xmas-start data-label="GHOSTBUSTERS"></xmas-start></div>
+  <div class="box forth3"><xmas-start data-label="FIRE"></xmas-start></div>
+  <div class="box forth4"><xmas-start data-label="CONVEYOR"></xmas-start></div>
+
+  <div class="box forth1"><xmas-start data-label="MONSTER"></xmas-start></div>
+  <div class="box forth2"><xmas-start data-label="CAVE"></xmas-start></div>
+  <div class="box forth3"><xmas-start data-label="GUGGE"></xmas-start></div>
+  <div class="box forth4"><xmas-start data-label="DRAGON"></xmas-start></div>
+
+  <div class="box forth1"><xmas-start data-label="SIGNAL1"></xmas-start></div>
+  <div class="box forth2"><xmas-start data-label="SIGNAL2"></xmas-start></div>
+  <div class="box forth3"><xmas-start data-label="SANTA"></xmas-start></div>
+  <div class="box forth4"><xmas-start data-label="ALLON"></xmas-start></div>
+
   <div class="box halfleft">
     <a href="https://www.facebook.com/groups/1123376876449124/"><img class="imgw" src="imgs/facebook.png" title="facebook"/></a>
   </div>
   <div class="box halfright">
-    <a href="https://github.com/mas802/xmas2020"><img class="imgw" src="imgs/github.jpg" title="github"/></a>
+    <a href="https://github.com/mas802/anqltrain"><img class="imgw" src="imgs/github.jpg" title="github"/></a>
   </div>
 </div>
 
   </main>
     <script src="app.js" type="module"></script>
+
+        <!-- TODO should move AUDIO js code into the webcomponent so it is accesible here instead of main -->
+<audio id="AUDIO_TRAIN" src="audio/train-crossing-short.mp3"></audio>
+<audio id="AUDIO_CROSSING" src="audio/train-crossing-short.mp3"></audio>
+<audio id="AUDIO_GUGGE" src="audio/gugge-short.mp3"></audio>
+<audio id="AUDIO_SANTA" src="audio/SANTA.mp3"></audio>
+<audio id="AUDIO_SANTA2" src="audio/SANTA2.mp3"></audio>
+<audio id="AUDIO_FIRE" src="audio/martinshorn.mp3"></audio>
+<audio id="AUDIO_GHOSTBUSTERS" src="audio/ghostbuster-short2.mp3"></audio>
+
+
 
   <script>
   (function() {
