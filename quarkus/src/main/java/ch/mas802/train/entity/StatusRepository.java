@@ -20,14 +20,18 @@ public class StatusRepository {
             return new Status( "load", -1, 500);
         }
         System.out.println( System.currentTimeMillis() + " get " + raw.state + " - " + (raw.until-System.currentTimeMillis()) + " - " + raw.deltaduration);
-        return new Status( raw.state, raw.until-System.currentTimeMillis(), raw.deltaduration);
+        return new Status( raw.state, raw.until-System.currentTimeMillis(), raw.deltaduration, raw.data);
     }
 
     public Status updateStatus(final String key, final String status, final long deltaduration) {
-        Status raw = new Status( status, System.currentTimeMillis()+deltaduration, deltaduration);
+        return updateStatus(key, status, deltaduration, null);
+    }
+
+    public Status updateStatus(final String key, final String status, final long deltaduration, final String dataValue) {
+        Status raw = new Status( status, System.currentTimeMillis()+deltaduration, deltaduration, dataValue);
         System.out.println( System.currentTimeMillis() + " set " + raw.state + " - " + (System.currentTimeMillis()+deltaduration) + " - " + deltaduration);
         data.put(key, raw);
-        return new Status( raw.state, raw.until-System.currentTimeMillis(), deltaduration);
+        return new Status( raw.state, raw.until-System.currentTimeMillis(), deltaduration, raw.data);
     }
 
     public Map<String, Status> status() {

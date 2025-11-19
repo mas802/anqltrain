@@ -1,6 +1,9 @@
 import { trainInfo,trainToggle } from "../control/StartControl.js";
 
 const sleep = m => new Promise(r => setTimeout(r, m))
+const YT_AUTOPLAY_QUERY = 'autoplay=1&playsinline=1';
+const DEFAULT_VIDEO_MODE = 'landscape';
+const SHORTS_VIDEO_MODE = 'shorts';
 
 class StartView extends HTMLElement {
 
@@ -11,7 +14,7 @@ class StartView extends HTMLElement {
     this.count = 0;
     this.state = "load";
     this.label = this.getAttribute('data-label');
-    this.youtube = this.getAttribute('youtube') || this.getAttribute('data-youtube');
+    this.youtube = null;
     this.token = this.extractTokenFromLocation();
     this.tokenMaxAgeSeconds = 10 * 60;
     this.expiredToken = false;
@@ -27,6 +30,7 @@ img {
     display: block;
     position: relative;
     z-index: 1;
+    cursor: pointer;
 }
 
 .img-label {
@@ -42,55 +46,7 @@ img {
     z-index: 0;
 }
 
-.overlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 9999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 120ms ease-in-out;
-}
-
-.overlay.open {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.overlay .overlay-content {
-    position: relative;
-    width: min(90vw, 1280px);
-}
-
-.overlay iframe {
-    width: 100%;
-    aspect-ratio: 16/9;
-    border: none;
-    background: #000;
-}
-
-.overlay button.close {
-    position: absolute;
-    top: -2.5rem;
-    right: 0;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 2rem;
-    cursor: pointer;
-}
-
 </style>
-<div class="overlay" id="videoOverlay" hidden>
-  <div class="overlay-content">
-    <button class="close" id="closeOverlay" aria-label="Close video">&times;</button>
-    <iframe id="youtubeFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  </div>
-</div>
 <span class="img-label" id="label">${this.label}</span>
 <img src="/imgs/${this.label}_${this.state}.jpg" id="start" alt="${this.label}" />`;
 
@@ -105,40 +61,68 @@ img {
     this.handleImageLoad = this.handleImageLoad.bind(this);
     this.openOverlay = this.openOverlay.bind(this);
     this.closeOverlay = this.closeOverlay.bind(this);
-    this.handleOverlayClick = this.handleOverlayClick.bind(this);
-    this.handleOverlayKeydown = this.handleOverlayKeydown.bind(this);
+    this.lastImageWasAdvent = false;
+    this.retryAdventImageOnce = false;
 
     this.ele = this;
   }
 
 
   update() {
+    const renderData = this.buildRenderData();
     this.buttonStart.hidden = false;
-    const isAdventState = this.state.startsWith('ADVENT_');
-    const imagePath = isAdventState
-      ? `/imgs/${this.state}.jpg`
-      : `/imgs/${this.label}_${this.state}.jpg`;
-    this.buttonStart.src = imagePath;
-    this.labelStart.textContent = isAdventState ? this.state : `${this.label}:${this.state}`;
+    this.buttonStart.src = renderData.imagePath;
+    this.labelStart.textContent = renderData.labelText;
+    this.lastImageWasAdvent = renderData.isAdventState;
+    this.retryAdventImageOnce = false;
+  }
+
+  buildRenderData(options = {}) {
+    const normalizedLabel = (this.label || '').trim().toUpperCase();
+    const normalizedState = (this.state ?? 'load').toString().trim() || 'load';
+    const upperState = normalizedState.toUpperCase();
+    const isAdventState = upperState.startsWith('ADVENT_');
+    let imagePath = isAdventState
+      ? `/imgs/${upperState}.jpg`
+      : `/imgs/${normalizedLabel}_${normalizedState}.jpg`;
+
+    if (options.cacheBust && isAdventState) {
+      const separator = imagePath.includes('?') ? '&' : '?';
+      imagePath = `${imagePath}${separator}_=${Date.now()}`;
+    }
+    const absolutePath = StartView.resolveAssetUrl(imagePath);
+    const labelText = isAdventState ? upperState : `${normalizedLabel}:${normalizedState}`;
+    return { imagePath: absolutePath, labelText, isAdventState };
   }
 
   handleImageError() {
-    this.buttonStart.src=`/imgs/TRANSPARENT.png`;
+    if (this.lastImageWasAdvent && !this.retryAdventImageOnce) {
+      this.retryAdventImageOnce = true;
+      const retryData = this.buildRenderData({ cacheBust: true });
+      this.buttonStart.src = retryData.imagePath;
+      return;
+    }
+    this.buttonStart.src = StartView.resolveAssetUrl('/imgs/TRANSPARENT.png');
   }
 
   handleImageLoad() {
     this.buttonStart.hidden = false;
   }
 
-  async infoCallback() {
-    if (this.isTokenExpired()) {
-        this.handleExpiredToken();
+  updateYoutubeFromResult(result) {
+    if (!result || typeof result !== 'object') {
+        this.youtube = null;
         return;
     }
+    this.youtube = result.data ? result.data : null;
+  }
+
+  async infoCallback() {
     var result = [];
     result = await trainInfo(this.label, this.token);
-    console.log(Date.now() + " info " + result)
+    console.log([Date.now() + " info ", result])
     this.state = result.state;
+    this.updateYoutubeFromResult(result);
     this.update();
 
     if ( result.state === "load" && result.until > 0 ) {
@@ -148,10 +132,6 @@ img {
   }
 
   async action(event) {
-    if (this.isTokenExpired()) {
-        this.handleExpiredToken();
-        return;
-    }
     if (this.youtube) {
         event?.preventDefault();
         this.openOverlay();
@@ -165,6 +145,7 @@ img {
     result = await trainToggle(this.label, this.token);
 
     this.state = result.state;
+    this.updateYoutubeFromResult(result);
     this.update();
 
     if ( result.until > 0 ) {
@@ -179,13 +160,6 @@ img {
     this.buttonStart.addEventListener('click', this.action);
     this.buttonStart.addEventListener('error', this.handleImageError);
     this.buttonStart.addEventListener('load', this.handleImageLoad);
-    this.overlay = this.shadowRoot.getElementById('videoOverlay');
-    this.overlayClose = this.shadowRoot.getElementById('closeOverlay');
-    this.youtubeFrame = this.shadowRoot.getElementById('youtubeFrame');
-    if (this.overlay && this.overlayClose) {
-        this.overlay.addEventListener('click', this.handleOverlayClick);
-        this.overlayClose.addEventListener('click', this.closeOverlay);
-    }
     this.infoCallback();
   }
 
@@ -193,41 +167,38 @@ img {
     this.buttonStart?.removeEventListener('click', this.action);
     this.buttonStart?.removeEventListener('error', this.handleImageError);
     this.buttonStart?.removeEventListener('load', this.handleImageLoad);
-    this.overlay?.removeEventListener('click', this.handleOverlayClick);
-    this.overlayClose?.removeEventListener('click', this.closeOverlay);
-    window.removeEventListener('keydown', this.handleOverlayKeydown);
   }
 
-  handleOverlayClick(event) {
-    if (event.target === this.overlay) {
-        this.closeOverlay();
-    }
-  }
-
-  handleOverlayKeydown(event) {
-    if (event.key === 'Escape') {
-        this.closeOverlay();
-    }
-  }
-
-  buildYouTubeEmbedUrl(urlOrId) {
+  buildYouTubeEmbedUrl(urlOrId, modeHint = SHORTS_VIDEO_MODE) {
     if (!urlOrId) {
         return null;
     }
-    // Support raw IDs and URLs.
+    const resolvedMode = modeHint || StartView.detectYoutubeMode(urlOrId);
+    const queryTail = resolvedMode === SHORTS_VIDEO_MODE
+        ? `${YT_AUTOPLAY_QUERY}&feature=shorts`
+        : `${YT_AUTOPLAY_QUERY}&rel=0`;
+    const buildUrl = id => `https://www.youtube.com/embed/${id}?${queryTail}`;
     if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) {
-        return `https://www.youtube.com/embed/${urlOrId}?autoplay=1`;
+        return buildUrl(urlOrId);
     }
     try {
-        const parsed = new URL(urlOrId, window.location.origin);
+        const baseOrigin = (typeof window !== 'undefined' && window.location)
+            ? window.location.origin
+            : 'https://www.youtube.com';
+        const parsed = new URL(urlOrId, baseOrigin);
         if (parsed.hostname.includes('youtu.be')) {
             const id = parsed.pathname.replace('/', '');
-            return id ? `https://www.youtube.com/embed/${id}?autoplay=1` : null;
+            return id ? buildUrl(id) : null;
         }
         if (parsed.hostname.includes('youtube.com')) {
+            const pathname = parsed.pathname || '';
+            if (pathname.toLowerCase().startsWith('/shorts/')) {
+                const id = pathname.split('/').filter(Boolean).pop();
+                return id ? buildUrl(id) : null;
+            }
             const id = parsed.searchParams.get('v');
             if (id) {
-                return `https://www.youtube.com/embed/${id}?autoplay=1`;
+                return buildUrl(id);
             }
         }
     } catch (e) {
@@ -237,26 +208,181 @@ img {
   }
 
   openOverlay() {
-    const embedUrl = this.buildYouTubeEmbedUrl(this.youtube);
-    if (!embedUrl || !this.overlay || !this.youtubeFrame) {
+    const mode = this.getYoutubeDisplayMode();
+    const embedUrl = this.buildYouTubeEmbedUrl(this.youtube, mode);
+    if (!embedUrl) {
         return;
     }
-    this.youtubeFrame.src = embedUrl;
-    this.overlay.hidden = false;
-    requestAnimationFrame(() => {
-        this.overlay.classList.add('open');
-    });
-    window.addEventListener('keydown', this.handleOverlayKeydown);
+    StartView.openGlobalOverlay(embedUrl, mode);
   }
 
   closeOverlay() {
-    if (!this.overlay || !this.youtubeFrame) {
+    StartView.closeGlobalOverlay();
+  }
+
+  static injectOverlayStyles() {
+    if (StartView.overlayStylesInjected || typeof document === 'undefined') {
         return;
     }
-    this.overlay.classList.remove('open');
-    this.overlay.hidden = true;
-    this.youtubeFrame.src = '';
-    window.removeEventListener('keydown', this.handleOverlayKeydown);
+    const style = document.createElement('style');
+    style.textContent = `
+.startview-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease-in-out;
+}
+
+.startview-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.startview-overlay__content {
+    position: relative;
+    width: min(90vw, 1280px);
+    max-height: 90vh;
+}
+
+.startview-overlay__frame {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: none;
+    background: #000;
+    max-height: 90vh;
+}
+
+.startview-overlay__close {
+    position: absolute;
+    top: -2.5rem;
+    right: 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.startview-overlay--shorts .startview-overlay__content {
+    width: min(70vw, 480px);
+}
+
+.startview-overlay--shorts .startview-overlay__frame {
+    aspect-ratio: 9/16;
+    max-height: 85vh;
+}
+`;
+    document.head.appendChild(style);
+    StartView.overlayStylesInjected = true;
+  }
+
+  static ensureOverlayResources() {
+    if (StartView.overlayElements || typeof document === 'undefined') {
+        return StartView.overlayElements;
+    }
+    StartView.injectOverlayStyles();
+    const overlay = document.createElement('div');
+    overlay.className = 'startview-overlay';
+    overlay.hidden = true;
+    overlay.innerHTML = `
+  <div class="startview-overlay__content">
+    <button type="button" class="startview-overlay__close" aria-label="Close video">&times;</button>
+    <iframe class="startview-overlay__frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen playsinline></iframe>
+  </div>
+`;
+    document.body.appendChild(overlay);
+    const frame = overlay.querySelector('iframe');
+    const closeButton = overlay.querySelector('.startview-overlay__close');
+    overlay.addEventListener('click', event => {
+        if (event.target === overlay) {
+            StartView.closeGlobalOverlay();
+        }
+    });
+    closeButton.addEventListener('click', () => StartView.closeGlobalOverlay());
+    StartView.overlayKeydownHandler = event => {
+        if (event.key === 'Escape') {
+            StartView.closeGlobalOverlay();
+        }
+    };
+    StartView.overlayElements = { overlay, frame };
+    return StartView.overlayElements;
+  }
+
+  static openGlobalOverlay(embedUrl, mode = DEFAULT_VIDEO_MODE) {
+    const elements = StartView.ensureOverlayResources();
+    if (!elements) {
+        return;
+    }
+    const isShorts = mode === SHORTS_VIDEO_MODE;
+    elements.overlay.classList.toggle('startview-overlay--shorts', isShorts);
+    elements.frame.src = embedUrl;
+    elements.overlay.hidden = false;
+    requestAnimationFrame(() => {
+        elements.overlay.classList.add('open');
+    });
+    document.addEventListener('keydown', StartView.overlayKeydownHandler);
+  }
+
+  static closeGlobalOverlay() {
+    const elements = StartView.overlayElements;
+    if (!elements) {
+        return;
+    }
+    elements.overlay.classList.remove('open');
+    elements.overlay.hidden = true;
+    elements.overlay.classList.remove('startview-overlay--shorts');
+    elements.frame.src = '';
+    document.removeEventListener('keydown', StartView.overlayKeydownHandler);
+  }
+
+  static resolveAssetUrl(path) {
+    if (typeof window === 'undefined' || !window.location) {
+        return path;
+    }
+    try {
+        return new URL(path, window.location.origin).href;
+    } catch (e) {
+        return path;
+    }
+  }
+
+  getYoutubeDisplayMode() {
+    const attrMode = (this.getAttribute('data-youtube-mode') || this.getAttribute('youtube-mode') || '')
+        .trim()
+        .toLowerCase();
+    if (attrMode === SHORTS_VIDEO_MODE || attrMode === DEFAULT_VIDEO_MODE) {
+        return attrMode;
+    }
+    return StartView.detectYoutubeMode(this.youtube);
+  }
+
+  static detectYoutubeMode(urlOrId) {
+    if (!urlOrId || typeof urlOrId !== 'string') {
+        return DEFAULT_VIDEO_MODE;
+    }
+    const lower = urlOrId.toLowerCase();
+    if (lower.includes('/shorts/')) {
+        return SHORTS_VIDEO_MODE;
+    }
+    try {
+        const baseOrigin = (typeof window !== 'undefined' && window.location)
+            ? window.location.origin
+            : 'https://www.youtube.com';
+        const parsed = new URL(urlOrId, baseOrigin);
+        if ((parsed.pathname || '').toLowerCase().includes('/shorts/')) {
+            return SHORTS_VIDEO_MODE;
+        }
+    } catch (e) {
+        // ignore invalid URLs
+    }
+    return DEFAULT_VIDEO_MODE;
   }
 
   extractTokenFromLocation() {
@@ -282,13 +408,10 @@ img {
     const nowSeconds = Math.floor(Date.now() / 1000);
     return (nowSeconds - parsed) > this.tokenMaxAgeSeconds;
   }
-
-  handleExpiredToken() {
-    this.expiredToken = true;
-    this.state = "YOUTUBE";
-    this.update();
-  }
-
 }
+
+StartView.overlayElements = null;
+StartView.overlayStylesInjected = false;
+StartView.overlayKeydownHandler = null;
 
 customElements.define('xmas-start', StartView);

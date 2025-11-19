@@ -82,19 +82,20 @@ public class TriggerService {
         triggers.put("CONTROL3:ON",  "set:PUMDIRECT:CONVEYOR:45:-20");
         triggers.put("CONTROL3:OFF", "set:PUMDIRECT:CONVEYOR:45:20");
 
-        triggers.put("CONTROL4:ON",  "set:MOTORDIRECT:10:3:120:105");
-        triggers.put("CONTROL4:OFF", "set:MOTORDIRECT:20:3:120:105");
+        triggers.put("CONTROL4:ON",  "set:MOTORDIRECT:10:3:100:103");
+        triggers.put("CONTROL4:OFF", "set:MOTORDIRECT:20:3:100:103");
 
         System.out.println("Initialized " + triggers.size() + " triggers");
     }
 
     private void initializeAdventGrid() {
+        addAdventEntry("TRAIN", 0, "TRAIN", "VMuNEjnc3yk");
         addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
         addAdventEntry("SWITCHFRONT", 2, "SWITCHFRONT");
         addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
         addAdventEntry("DECOUPLERFRONT", 4, "DECOUPLERFRONT");
 
-        addAdventEntry("LOADER", 3, "LOADER");
+        addAdventEntry("LOADER", 3, "LOADER", "https://youtube.com/shorts/a8fP_QiH25g?si=N4v5ZlKRXY38xSgz");
         addAdventEntry("ALLOFF", 1, "ALLOFF");
         addAdventEntry("RED", 7, "RED");
         addAdventEntry("CROSSING", 13, "CROSSING");
@@ -121,12 +122,16 @@ public class TriggerService {
     }
 
     private void addAdventEntry(String key, int day, String action) {
-        adventGrid.put(key, new AdventEntry(day, action));
+        addAdventEntry(key, day, action, null);
+    }
+
+    private void addAdventEntry(String key, int day, String action, String data) {
+        adventGrid.put(key, new AdventEntry(day, action, data));
     }
 
     public Status buildAdventStatus(String key, long epochSecond) {
         AdventEntry event = adventGrid.get(key);
-        if (event == null) {
+        if (event == null || event.day()<1) {
             return null;
         }
         long eventStartEpochSecond = DECEMBER_2025_DAY_STARTS[event.day()];
@@ -141,10 +146,12 @@ public class TriggerService {
     public static final class AdventEntry {
         private final int day;
         private final String action;
+        private final String data;
 
-        public AdventEntry(int day, String action) {
+        public AdventEntry(int day, String action, String data) {
             this.day = day;
             this.action = action;
+            this.data = data;
         }
 
         public int day() {
@@ -153,6 +160,10 @@ public class TriggerService {
 
         public String action() {
             return action;
+        }
+
+        public String data() {
+            return data;
         }
     }
 }

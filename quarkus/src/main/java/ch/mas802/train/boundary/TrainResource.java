@@ -21,6 +21,7 @@ import java.time.Instant;
 
 import ch.mas802.train.control.TriggerService;
 import ch.mas802.train.control.WsService;
+import ch.mas802.train.control.TriggerService.AdventEntry;
 
 @Path("/train")
 public class TrainResource {
@@ -46,7 +47,7 @@ public class TrainResource {
         }
 
         if (isTokenExpired(token)) {
-            return youtubeStatus();
+            return youtubeStatus(key);
         }
 //        if (key.length() > 10 || !"".equals(key.replaceAll("^[A-Z]", ""))) return null;
         if (alwaysOnList.contains(key)) {
@@ -68,7 +69,7 @@ public class TrainResource {
         }
 
         if (isTokenExpired(token)) {
-            return youtubeStatus();
+            return youtubeStatus(key);
         }
 //        if (key.length() > 10 || !"".equals(key.replaceAll("^[A-Z]", ""))) return null;
         if (alwaysOnList.contains(key)) {
@@ -124,8 +125,10 @@ public class TrainResource {
         }
     }
 
-    private Status youtubeStatus() {
-        return new Status("YOUTUBE", 10000, 10000);
+    private Status youtubeStatus(String key) {
+        AdventEntry event = triggerService.getAdventGrid().get(key);
+        return new Status("YOUTUBE", 10000, 10000, 
+            (event != null && event.data() != null) ? event.data() : "VMuNEjnc3yk");
     }
 
     private long epochFromTokenOrNow(String token) {

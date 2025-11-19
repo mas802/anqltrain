@@ -60,11 +60,11 @@ public class WsService {
           broadcast(mode+":"+key);
           until = status.deltaduration*2;
           if (until>10000) {
-            return new Status("error", until*2, until);
+            return new Status("error", until*2, until, status.data);
           }
         }
-        statusRepository.updateStatus(key, "load", until);
-        return new Status("load", until*2, until);
+        statusRepository.updateStatus(key, "load", until, status.data);
+        return new Status("load", until*2, until, status.data);
     }
 
     public Status info(final String key) {
@@ -95,8 +95,8 @@ public class WsService {
                 .map(message -> {
                     System.out.println("triggerOrToggle DO: " + key + " - " + status.state + " to " + targetState);
                     broadcast(message);
-                    statusRepository.updateStatus(key, targetState, 2000);
-                    return new Status("load", until * 2, until);
+                    statusRepository.updateStatus(key, targetState, 2000, status.data);
+                    return new Status("load", until * 2, until, status.data);
                 })
                 .orElseGet(() -> {
                     System.out.println("triggerOrToggle DONT: " + key + " - " + status.state + " to " + targetState);
@@ -111,4 +111,5 @@ public class WsService {
     public Map<String, Status> status() {
         return statusRepository.status();
     }
+
 }
