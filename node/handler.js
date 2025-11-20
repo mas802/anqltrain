@@ -58,6 +58,8 @@ const CROSSING_WAIT = 1500;
 const SHORT_WAIT = 500;
 const ROLLBACK = 8000;
 
+const TRAIN_DURATION_FACTOR = 100;
+
 setInterval( function() {
   if (!watchdogTimer) {
     if (resetCounter < resetLimit ) {
@@ -216,6 +218,46 @@ function colorTrainAction(color) {
   }
 }
 
+const STATIONS = {
+  FRONT: 'FRONT',
+  UNLOADER: 'UNLOADER',
+  YARD: 'YARD',
+  LOADER: 'LOADER',
+  BACK: "BACK"
+};
+
+let compositionAttached = ['X', 'X', 'X'];
+let compositionAtYard = [];
+let compositionAtLoader = [];
+
+let colorAtYard = [];
+let colorAtLoader = [];
+
+let trainLocation = STATIONS.FRONT;
+
+function handleDecouplerAction(splitLength, decoupler) {
+  let trainLength = compositionAttached.length;
+
+  if (trainLength > splitLength) {
+    trainLength -= splitLength;
+    compositionAtYard = compositionAttached.splice(-splitLength);
+  } else {
+    console.log("ERROR AT DECOUPLER 1");
+    // check and reset
+  }
+
+  const trainsSpeed = 70 + trainLength * 12;
+  const trainDuration = FULL_ROUND / TRAIN_DURATION_FACTOR;
+  const decouplerRelay = `relay:set:${decoupler}`;
+
+  sendOrQueueSafe(["relay:set:MOTORDIRECT:20:3:4:"+trainsSpeed], CROSSING_WAIT);
+  sendOrQueueSafe([`${decouplerRelay}:ON`], CROSSING_WAIT);
+  sendOrQueueSafe(["relay:set:MOTORDIRECT:10:3:4:"+(trainsSpeed+100)], CROSSING_WAIT);
+  sendOrQueueSafe([`${decouplerRelay}:OFF`, `relay:set:MOTORDIRECT:10:3:${trainDuration}:${trainsSpeed}`], FULL_ROUND);
+  sendOrQueueSafe([COLORTRIGGER, `set:TRAINLOC:FRONT`], CROSSING_WAIT);
+
+  trainLocation = STATIONS.FRONT;
+}
 
 //
 // BOUNDARY WEBSOCKET
@@ -245,11 +287,20 @@ function receiveMsg(message) {
 
   if (queue.length < 20) {
     if (message === "toggle:BLUE" || message === "toggle:TRAIN") {
-//      sendOrQueueSafe(["relay:set:TRAIN:crossingdown"], CROSSING_WAIT);
-      sendOrQueueSafe(["relay:set:TRAIN:forward"], FULL_ROUND);
-//      sendOrQueueSafe([COLORTRIGGER], QUARTER_ROUND);
-//      sendOrQueueSafe(["relay:set:TRAIN:stop"], CROSSING_WAIT);
-//      sendOrQueueSafe(["relay:set:TRAIN:crossingup"], SHORT_WAIT);
+      let trainLength = compositionAttached.length;
+
+      const trainsSpeed = 75 + trainLength * 10;
+      const trainDuration = FULL_ROUND / TRAIN_DURATION_FACTOR;
+ 
+      if (trainLocation === STATIONS.FRONT) {
+        sendOrQueueSafe([`relay:set:MOTORDIRECT:20:3:${trainDuration}:${trainsSpeed}`], FULL_ROUND);
+        trainLocation = STATIONS.BACK;
+      } else {
+        sendOrQueueSafe(["relay:set:MOTORDIRECT:10:3:4:"+(trainsSpeed+100)], CROSSING_WAIT);
+        sendOrQueueSafe([`relay:set:MOTORDIRECT:10:3:${trainDuration}:${trainsSpeed}`], FULL_ROUND);
+        trainLocation = STATIONS.FRONT;
+      }
+
     }
 
     if (message === "toggle:ORANGE") {
@@ -260,23 +311,12 @@ function receiveMsg(message) {
       sendOrQueueSafe(["relay:set:TRAIN:crossingup"], SHORT_WAIT);
     }
 
-    if (message === "toggle:GREEN" ) {
-      sendOrQueueSafe(["relay:set:TRAIN:backward"], FULL_ROUND);
-//      sendOrQueueSafe(["relay:set:TRAIN:crossingdown"], CROSSING_WAIT);
-//      sendOrQueueSafe(["relay:set:TRAIN:startforward", "relay:set:TRAINLED:GREEN", "relay:set:SIGNAL1:OFF"], FULL_ROUND);
-//      sendOrQueueSafe([COLORTRIGGER], QUARTER_ROUND);
-//      sendOrQueueSafe(["relay:set:WHITE1:OFF", "relay:toggle:DECOUPLERBACK", "relay:toggle:SIGNAL2",  "relay:info:SIGNAL2", "relay:set:TRAIN:backward"], ROLLBACK);
-//      sendOrQueueSafe(["relay:set:TRAIN:stop"], CROSSING_WAIT);
-//      sendOrQueueSafe(["relay:set:TRAIN:crossingup"], SHORT_WAIT);
+    if (message === "toggle:RED" ) { // FRONT,YARD,DOUBLE
+      handleDecouplerAction(2, "DECOUPLERFRONT");
     }
 
-    if (message === "toggle:RED" ) {
-      sendOrQueueSafe(["relay:set:TRAIN:crossingdown"], CROSSING_WAIT);
-      sendOrQueueSafe(["relay:set:TRAIN:startforward", "relay:set:TRAINLED:RED", "relay:set:SIGNAL1:OFF"], FULL_ROUND);
-      sendOrQueueSafe([COLORTRIGGER], QUARTER_ROUND);
-      sendOrQueueSafe(["relay:set:WHITE1:ON", "relay:toggle:DECOUPLERFRONT", "relay:toggle:SIGNAL3",  "relay:set:TRAIN:backward"], ROLLBACK);
-      sendOrQueueSafe(["relay:set:TRAIN:stop"], CROSSING_WAIT);
-      sendOrQueueSafe(["relay:set:TRAIN:crossingup"], SHORT_WAIT);
+    if (message === "toggle:GREEN" ) { // 
+      handleDecouplerAction(2, "DECOUPLERBACK");
     }
   }
 

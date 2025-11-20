@@ -56,16 +56,16 @@ let motorConfig = {
 "DECOUPLERBACK" : {
   motor: null,
   state: "OFF",
-  degrees: 140,
-  speed: -5,
+  degrees: 160,
+  speed: 5,
   led: null,
   mode: "toggle"
 },
 "DECOUPLERFRONT" : {
   motor: null,
   state: "OFF",
-  degrees: 140,
-  speed: -5,
+  degrees: 280,
+  speed: 5,
   led: null,
   mode: "toggle"
 }
