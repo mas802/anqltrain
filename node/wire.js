@@ -77,7 +77,7 @@ var status = {
    'WHITE2' : 0,
    'WHITE1R' : 0,
    'WHITE2R' : 0,
-   'TRAIN' : "WHITE",
+   'TRAINDEPRECATED' : "WHITE",
    'CROSSING' : "OFF",
    'GHOSTBUSTERS': 0
 };
@@ -242,6 +242,7 @@ function receiveMsg(message) {
   itemName = cmd[1];
 
   if (cmd[1] === "TRAINLED" && cmd[0] === "set") {
+    console.log(["why does this exist and what does it do?", cmd])
     status["TRAIN"] = cmd[2];
   }
 
@@ -266,7 +267,7 @@ function receiveMsg(message) {
     trainValue = 0;
     trainDuration = 200;
     let modus = modes[itemName];
-    if (cmd[1] === "TRAIN" && cmd[0] == "set") {
+    if (cmd[1] === "TRAINDEPRECATED" && cmd[0] == "set") {
       if (cmd[2] === 'fastforward') {
         trainMode = TRAIN_FORWARD;
         trainValue = FORWARD_SPEED;
@@ -347,7 +348,7 @@ function receiveMsg(message) {
 // CONTROL
 
 statusSync = function(forceall, forceditem) {
-  if (forceditem === "TRAIN" || forceditem === "CROSSING") {
+  if (forceditem === "TRAINDEPRECATED" || forceditem === "CROSSING") {
     sendMsg("state:"+forceditem+":"+status[forceditem]);
   } else {
 
