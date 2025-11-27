@@ -56,6 +56,7 @@ const QUARTER_ROUND = colorDetectionTimeout+10;
 const CROSSING_WAIT = 1500;
 const BOOST_WAIT = 400;
 const SHORT_WAIT = 500;
+const QUEUE_WAIT = 0;
 const ROLLBACK = 8000;
 
 const TRAIN_DURATION_FACTOR = 100;
@@ -109,7 +110,7 @@ function sendWithTimeout(msgs,duration) {
 }
 
 function shiftQueue(delta=0) {
-  console.log("shift with delta " + delta);
+  console.log("----QUEUE: shift with delta " + delta + " remaining: " + queue.length);
   clearTimeout(watchdogTimer);
   watchdogTimer = null;
   var msg = queue.shift();
@@ -118,7 +119,7 @@ function shiftQueue(delta=0) {
   } else {
     // pic();
     // sendMsg(["relay:set:TRAIN:stop", "relay:set:TRAINLED:WHITE"]);
-    console.log("queue empty");
+    console.log("----QUEUE: empty");
   }
 }
 
@@ -154,8 +155,8 @@ function pic() {
 
 function colorDetected(color, context) {
   console.log(["detect color", color, context]);
-  if (context === "SWITCHXX") {
-    colorTrainDetection(color, context);
+  if (context === "SWITCH") {
+    // colorTrainDetection(color, context);
   } else if (context === "DECOUPLER") {
     colorAtYard = color;
   } else if (context === "CONVEYOR") {
@@ -163,6 +164,7 @@ function colorDetected(color, context) {
   }
 }
 
+/*
 function colorTrainDetection(color, context) {
   if (colorTimer == null) {
   }
@@ -233,6 +235,7 @@ function colorTrainAction(color) {
     }, colorActionTimeout)
   }
 }
+*/
 
 const STATIONS = {
   FRONT: 'FRONT',
@@ -253,7 +256,6 @@ compositionAt[STATIONS.UNLOADER] = [];
 compositionAt[STATIONS.FRONT] = [];
 
 // CONSIDER let compositionTo = [];
-
 
 let colorAtYard = "NONE";
 let colorAtLoader = "NONE";
@@ -353,7 +355,7 @@ function receiveMsg(message) {
       (message === "toggle:ORANGE" || message === "toggle:UNLOADER") ||
       (message === "toggle:RED" || message === "toggle:YARD" )||
       (message === "toggle:GREEN" || message === "toggle:LOADER" || message === "toggle:LOADEE")) {
-      sendOrQueueSafe([`relay:${message}`], 0);
+      sendOrQueueSafe([`relay:${message}`], QUEUE_WAIT);
     }
 
   } else {
@@ -425,13 +427,13 @@ function receiveMsg(message) {
 
     if (message === "toggle:DEMO") { // 
         ensureFront();
-        sendOrQueueSafe([`relay:toggle:YARD`], 0);
-        sendOrQueueSafe([`relay:toggle:YARD`], 0);
-        sendOrQueueSafe([`relay:toggle:LOADER`], 0);
-        sendOrQueueSafe([`relay:toggle:LOADEE`], 0);
-        sendOrQueueSafe([`relay:toggle:UNLOADER`], 0);
-        sendOrQueueSafe([`relay:toggle:YARD`], 0);
-        sendOrQueueSafe([`relay:toggle:FRONT`], 0);
+        sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:LOADER`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:LOADEE`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:UNLOADER`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:FRONT`], QUEUE_WAIT);
     }
 
   }

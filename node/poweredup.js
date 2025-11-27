@@ -17,6 +17,8 @@ let remoteButtonLeft = null;
 let remoteButtonRight = null;
 let remoteLed = null;
 
+let lastColorAt = [];
+
 // Remote configurations now loaded from config.json
 let hubConfigs = config.remoteConfigs;
 
@@ -45,7 +47,7 @@ let motorConfig = {
   led: null,
   mode: "normal"
 },
-"LOADER" : {
+"LOADERMOTOR" : {
   motor: null,
   state: "OFF",
   degrees: 45,
@@ -172,7 +174,7 @@ poweredUP.on("discover", async (hub) => {
         });
 
         hub.on("colorAndDistance", (device, { color, distance }) => {
-          colorSensorHandler(device, color, "DECOUPLER");
+          colorSensorHandler(device, color, distance, "DECOUPLER");
         });
 
       } else if (hub.primaryMACAddress == config["hubAddr"]["SWITCHHUB"]) {
@@ -193,7 +195,7 @@ poweredUP.on("discover", async (hub) => {
           sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
           hub.on("colorAndDistance", (device, { color, distance }) => {
-            colorSensorHandler(device, color, "DECOUPLER");
+            colorSensorHandler(device, color, distance, "DECOUPLER");
           });
 
       } else if (hub.primaryMACAddress == config["hubAddr"]["DECOUPLERHUB"]) {
@@ -213,7 +215,7 @@ poweredUP.on("discover", async (hub) => {
           sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
           hub.on("colorAndDistance", (device, { color, distance }) => {
-            colorSensorHandler(device, color, "DECOUPLER");
+            colorSensorHandler(device, color, distance, "DECOUPLER");
           });
 
 /*
@@ -276,11 +278,15 @@ function buttonHandler(device, context, state) {
   sendMsg("trigger:"+context+":"+PoweredUP.Consts.ButtonState[state]);
 }
 
-function colorSensorHandler(device, color, context) {
-  if (color) {
-    sendMsg("relay:color:"+context+":"+PoweredUP.Consts.Color[color]);
-  } else {
-    sendMsg("relay:color:"+context+":NONE");
+function colorSensorHandler(device, color, distance, context) {
+  let reportColor = "NONE";
+  if (color && distance < 100) {
+    reportColor = PoweredUP.Consts.Color[color];
+  } 
+
+  if (reportColor != lastColorAt[context]) {
+    sendMsg("relay:color:"+context+":"+reportColor);
+    lastColorAt[context] = reportColor;
   }
 }
 
