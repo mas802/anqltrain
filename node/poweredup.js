@@ -33,7 +33,7 @@ let motorConfig = {
   motor: null,
   state: "OFF",
   degrees: 110,
-  speed: 100,
+  speed: -100,
   led: null,
   mode: "toggle"
 },
@@ -156,37 +156,48 @@ poweredUP.on("discover", async (hub) => {
 
     } else if (hub.type === PoweredUP.Consts.HubType.MOVE_HUB) {
 
-       if (hub.primaryMACAddress == config["hubAddr"]["CONVEYORHUB"]) {
-        console.log(`INFO: Connected to CONVEYORHUB moveHub (${hub.name} / ${hub.primaryMACAddress}))!`);
+      if (hub.primaryMACAddress == config["hubAddr"]["CONVEYORHUB"]) {
+        console.log(`INFO: Connected to CONVEYORHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
         motorConfig["CONVEYOR"].motor = await hub.waitForDeviceAtPort("B");
 
         led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
         led.setColor(PoweredUP.Consts.Color.YELLOW);
 
+        sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
+        sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
-       } else if (hub.primaryMACAddress == config["hubAddr"]["SWITCHHUB"]) {
-          console.log(`INFO: Connected to SWITCHHUB moveHub (${hub.name} / ${hub.primaryMACAddress}))!`);
+        hub.on("button", (device) => {
+          buttonHandler(device, "SWITCHFRONT", PoweredUP.Consts.ButtonState.PRESSED);
+        });
 
-          hub.on("color", (device, { color }) => {
-            colorSensorHandler(device, color, "BACK");
-          });
+        hub.on("colorAndDistance", (device, { color, distance }) => {
+          colorSensorHandler(device, color, "DECOUPLER");
+        });
 
-          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("C");
-          motorConfig["SWITCHFRONT"].led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
-          motorConfig["SWITCHFRONT"].led.setColor(PoweredUP.Consts.Color.ORANGE);
+      } else if (hub.primaryMACAddress == config["hubAddr"]["SWITCHHUB"]) {
 
-          motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("D");
+          console.log(`INFO: Connected to SWITCHHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
+
+          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("D");
+
+          motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("A");
           motorConfig["SWITCHBACK"].led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
           motorConfig["SWITCHBACK"].led.setColor(PoweredUP.Consts.Color.YELLOW);
 
           hub.on("button", (device) => {
-            console.log("button pressed");
             buttonHandler(device, "SWITCHFRONT", PoweredUP.Consts.ButtonState.PRESSED);
           });
 
-        } else if (hub.primaryMACAddress == config["hubAddr"]["DECOUPLERHUB"]) {
-          console.log(`INFO: Connected to DECOUPLERHUB moveHub (${hub.name} / ${hub.primaryMACAddress}))!`);
+          sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
+          sensor.setColor(PoweredUP.Consts.Color.WHITE);
+
+          hub.on("colorAndDistance", (device, { color, distance }) => {
+            colorSensorHandler(device, color, "DECOUPLER");
+          });
+
+      } else if (hub.primaryMACAddress == config["hubAddr"]["DECOUPLERHUB"]) {
+          console.log(`INFO: Connected to DECOUPLERHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
           motorConfig["DECOUPLERFRONT"].motor = await hub.waitForDeviceAtPort("A");
 
@@ -194,10 +205,16 @@ poweredUP.on("discover", async (hub) => {
           motorConfig["DECOUPLERBACK"].led.setColor(PoweredUP.Consts.Color.BLUE);
           motorConfig["DECOUPLERBACK"].motor = await hub.waitForDeviceAtPort("B");
 
-          hub.on("color", (device, { color }) => {
-            colorSensorHandler(device, color, "FRONT");
+          hub.on("button", (device) => {
+            buttonHandler(device, "SWITCHFRONT", PoweredUP.Consts.ButtonState.PRESSED);
           });
 
+          sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
+          sensor.setColor(PoweredUP.Consts.Color.WHITE);
+
+          hub.on("colorAndDistance", (device, { color, distance }) => {
+            colorSensorHandler(device, color, "DECOUPLER");
+          });
 
 /*
           hub.on("colorAndDistance", (device, { color, distance}) => {
@@ -210,9 +227,6 @@ poweredUP.on("discover", async (hub) => {
             colorSensorHandler(device, PoweredUP.Consts.Color.BLUE, "DECOUPLER");
           });
 */
-          hub.on("button", (device) => {
-            buttonHandler(device,"DECOUPLER", PoweredUP.Consts.ButtonState.PRESSED);
-          });
         }
 
         hub.on("disconnect", () => {
@@ -263,8 +277,10 @@ function buttonHandler(device, context, state) {
 }
 
 function colorSensorHandler(device, color, context) {
-  if (color && color != 0) {
+  if (color) {
     sendMsg("relay:color:"+context+":"+PoweredUP.Consts.Color[color]);
+  } else {
+    sendMsg("relay:color:"+context+":NONE");
   }
 }
 

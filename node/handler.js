@@ -50,16 +50,17 @@ let lastColorAction = "NONE";
 let lastDetectionColor = "NONE";
 const colorActions = ["BLUE", "RED", "GREEN"];
 
-const FULL_ROUND = 7500;
+const FULL_ROUND = 8000;
 const HALF_ROUND = 3100;
 const QUARTER_ROUND = colorDetectionTimeout+10;
 const CROSSING_WAIT = 1500;
+const BOOST_WAIT = 400;
 const SHORT_WAIT = 500;
 const ROLLBACK = 8000;
 
 const TRAIN_DURATION_FACTOR = 100;
 
-const BASE_SPEED = 76;
+const BASE_SPEED = 75;
 const PER_WAGON_SPEED = 11;
 
 setInterval( function() {
@@ -68,12 +69,23 @@ setInterval( function() {
       console.log("-");
       resetCounter++;
     } else {
+      trainLocation = STATIONS.FRONT; // SET TO FRONT, so that we cycle over the FRONT here
       resetCounter = -99;
       console.log("---------------------------------------------------------------------");
       console.log("  PERIODICALLY RESET ALL");
       console.log("---------------------------------------------------------------------");
-      sendMsg(["relay:set:DECOUPLERFRONT:OFF", "relay:set:DECOUPLERBACK:OFF", "relay:set:SIGNAL2:OFF", "relay:set:SIGNAL3:OFF", "relay:set:TRAINLED:WHITE", "relay:set:ALLLIGHTS:OFF"]);
-      pic();
+      sendMsg([
+        "relay:set:TRAIN:FRONT",
+        "relay:set:SWITCHFRONT:OFF", 
+        "relay:set:SWITCHBACK:ON", 
+        "relay:set:DECOUPLERFRONT:OFF", 
+        "relay:set:DECOUPLERBACK:OFF", 
+        "relay:set:SIGNAL1:OFF", 
+        "relay:set:SIGNAL2:OFF", 
+        "relay:set:SIGNAL3:OFF", 
+        "relay:set:ALLLIGHTS:OFF",
+      ]);
+      // pic();
     }
   } else {
     resetCounter = 0;
@@ -104,8 +116,9 @@ function shiftQueue(delta=0) {
   if (msg) {
     sendWithTimeout(msg[0],msg[1]-delta);
   } else {
-    pic();
-    sendMsg(["relay:set:TRAIN:stop", "relay:set:TRAINLED:WHITE"]);
+    // pic();
+    // sendMsg(["relay:set:TRAIN:stop", "relay:set:TRAINLED:WHITE"]);
+    console.log("queue empty");
   }
 }
 
@@ -126,26 +139,28 @@ function sendOrQueueSafe(msgs, duration) {
       console.error("FAILSAFE TRIGGERED, should not happen");
       console.error("---------------------------------------------------------------------");
     }, 10000);
-
 */
 
 function pic() {
-      var yourscript = exec('sh /home/train/anqltrain/sh/pic.sh',
-        (error, stdout, stderr) => {
-            console.log(stdout);
-            console.log(stderr);
-            if (error !== null) {
-                console.log(`exec error: ${error}`);
-            }
-        });
+  var yourscript = exec('sh /home/train/anqltrain/sh/pic.sh',
+  (error, stdout, stderr) => {
+    console.log(stdout);
+    console.log(stderr);
+    if (error !== null) {
+        console.log(`exec error: ${error}`);
+    }
+  });
 }
 
 function colorDetected(color, context) {
-//  if (context === "SWITCHXX") {
+  console.log(["detect color", color, context]);
+  if (context === "SWITCHXX") {
     colorTrainDetection(color, context);
-//  } else {
-//    colorTrainAction(color);
-//  }
+  } else if (context === "DECOUPLER") {
+    colorAtYard = color;
+  } else if (context === "CONVEYOR") {
+    colorAtLoader = color;  
+  }
 }
 
 function colorTrainDetection(color, context) {
@@ -193,7 +208,6 @@ function recordColor(color, context) {
   }
 }
 
-
 function colorTrainAction(color) {
   if (colorActionTimer === null) {
     toggle = lights.sort(() => Math.random() - 0.5)[0];
@@ -230,14 +244,19 @@ const STATIONS = {
 };
 
 let compositionAttached = ['G', 'G', 'G'];
+let colorOrder = ['B', 'W', 'Y'];
 
 let compositionAt = [];
 compositionAt[STATIONS.YARD] = [];
 compositionAt[STATIONS.LOADER] = [];
 compositionAt[STATIONS.UNLOADER] = [];
+compositionAt[STATIONS.FRONT] = [];
 
-let colorAtYard = [];
-let colorAtLoader = [];
+// CONSIDER let compositionTo = [];
+
+
+let colorAtYard = "NONE";
+let colorAtLoader = "NONE";
 
 let trainLocation = STATIONS.FRONT;
 let path = STATIONS.YARD;
@@ -255,12 +274,11 @@ function handleDecouplerAction(splitLength, decoupler) {
     // check and reset
   }
 
-  const trainDuration = FULL_ROUND / TRAIN_DURATION_FACTOR;
   const decouplerRelay = `relay:set:${decoupler}`;
 
-  sendOrQueueSafe([trainRelay(20,0,CROSSING_WAIT)], CROSSING_WAIT);
+  sendOrQueueSafe([trainRelay(20,0,BOOST_WAIT)], BOOST_WAIT);
   sendOrQueueSafe([`${decouplerRelay}:ON`], CROSSING_WAIT);
-  sendOrQueueSafe([trainRelay(10,100,CROSSING_WAIT)], CROSSING_WAIT);
+  sendOrQueueSafe([trainRelay(10,100,BOOST_WAIT)], BOOST_WAIT);
   sendOrQueueSafe([`${decouplerRelay}:OFF`, trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
   sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:FRONT`], CROSSING_WAIT);
   trainLocation = STATIONS.FRONT;
@@ -268,9 +286,32 @@ function handleDecouplerAction(splitLength, decoupler) {
   return detached;
 }
 
+function ensurePath(path) {
+  switch (path) {
+    case STATIONS.UNLOADER:
+     sendOrQueueSafe(["relay:set:SWITCHFRONT:ON"], SHORT_WAIT);
+     break;
+    case STATIONS.LOADER:
+     sendOrQueueSafe(["relay:set:SWITCHFRONT:ON", "relay:set:SWITCHBACK:OFF"], SHORT_WAIT);
+     break;
+    case STATIONS.YARD:
+     sendOrQueueSafe(["relay:set:SWITCHFRONT:OFF", "relay:set:SWITCHBACK:OFF"], SHORT_WAIT);
+     break;
+    default:
+      console.log("ERROR: illegal path value " + path);
+  }
+}
+
+function ensureFront() {
+  if (trainLocation != STATIONS.FRONT) {
+    sendOrQueueSafe([trainRelay(10,100,BOOST_WAIT)], BOOST_WAIT);
+    sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
+  }
+}
+
 function trainRelay(mode, speeddelta, duration) {
   let trainLength = compositionAttached.length;
-  let trainsSpeed = 70 + trainLength * 12 + speeddelta;
+  let trainsSpeed = BASE_SPEED + trainLength * PER_WAGON_SPEED + speeddelta;
   let trainDuration = duration/100;
   return `relay:set:MOTORDIRECT:${mode}:3:${trainDuration}:${trainsSpeed}`;
 }
@@ -302,10 +343,20 @@ function receiveMsg(message) {
   }
 
   if (cmd[0] === "set" && cmd[1] === "TRAINLOC") {
-    console.log(["TRAINLOC", cmd[2], trainLocation, path, compositionAttached, compositionAt]);
+    console.log(["TRAINLOC", cmd[2], trainLocation, path, compositionAttached, compositionAt, colorAtYard, colorAtLoader]);
   }
 
-  if (queue.length < 20) {
+  if (queue.length > 1 && queue.length < 10) {
+
+    // CONSIDER: maybe have a queu prefix and resolve first
+    if ((message === "toggle:BLUE" || message === "toggle:TRAIN" || message === "toggle:FRONT") ||
+      (message === "toggle:ORANGE" || message === "toggle:UNLOADER") ||
+      (message === "toggle:RED" || message === "toggle:YARD" )||
+      (message === "toggle:GREEN" || message === "toggle:LOADER" || message === "toggle:LOADEE")) {
+      sendOrQueueSafe([`relay:${message}`], 0);
+    }
+
+  } else {
 
     if (message === "toggle:BLUE" || message === "toggle:TRAIN" || message === "toggle:FRONT") {
       if (trainLocation === STATIONS.FRONT) {
@@ -313,10 +364,10 @@ function receiveMsg(message) {
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:`+path], CROSSING_WAIT);
         trainLocation = path;
         compositionAttached.push(...compositionAt[trainLocation]);
+        compositionTo[path].push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
       } else {
-        sendOrQueueSafe([trainRelay(10,100,CROSSING_WAIT)], CROSSING_WAIT);
-        sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
+        ensureFront();
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:FRONT`], CROSSING_WAIT);
         trainLocation = STATIONS.FRONT;
       }
@@ -324,15 +375,10 @@ function receiveMsg(message) {
 
     if (message === "toggle:ORANGE" || message === "toggle:UNLOADER") {
       if (trainLocation === STATIONS.UNLOADER) {
-        // nothing?
+        ensureFront();
+        trainLocation = STATIONS.FRONT;
       } else {
-        let trainLength = compositionAttached.length;
-        const trainsSpeed = BASE_SPEED + trainLength * PER_WAGON_SPEED;
-        const trainDuration = FULL_ROUND / TRAIN_DURATION_FACTOR;
-        if (trainLocation != STATIONS.FRONT) {
-          sendOrQueueSafe([trainRelay(10,100,CROSSING_WAIT)], CROSSING_WAIT);
-          sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
-        }
+        ensureFront();
         sendOrQueueSafe(["relay:set:SWITCHBACK:OFF"], CROSSING_WAIT);
         sendOrQueueSafe([trainRelay(20,0,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:UNLOADER`], CROSSING_WAIT);
@@ -346,13 +392,7 @@ function receiveMsg(message) {
       if (trainLocation === STATIONS.YARD) {
         compositionAt[STATIONS.YARD] = handleDecouplerAction(2, "DECOUPLERFRONT");
       } else {
-        let trainLength = compositionAttached.length;
-        const trainsSpeed = 75 + trainLength * 10;
-        const trainDuration = FULL_ROUND / TRAIN_DURATION_FACTOR;
-        if (trainLocation != STATIONS.FRONT) {
-          sendOrQueueSafe([trainRelay(10,100,CROSSING_WAIT)], CROSSING_WAIT);
-          sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
-        }
+        ensureFront();
         sendOrQueueSafe(["relay:set:SWITCHFRONT:OFF", "relay:set:SWITCHBACK:ON"], CROSSING_WAIT);
         sendOrQueueSafe([trainRelay(20,0,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:YARD`], CROSSING_WAIT);
@@ -367,13 +407,7 @@ function receiveMsg(message) {
       if (trainLocation === STATIONS.LOADER) {
         compositionAt[STATIONS.LOADER] = handleDecouplerAction(1, "DECOUPLERBACK");
       } else {
-        let trainLength = compositionAttached.length;
-        const trainsSpeed = 75 + trainLength * 10;
-        const trainDuration = FULL_ROUND / TRAIN_DURATION_FACTOR;
-        if (trainLocation != STATIONS.FRONT) {
-          sendOrQueueSafe([trainRelay(10,100,CROSSING_WAIT)], CROSSING_WAIT);
-          sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
-        }
+        ensureFront();
         sendOrQueueSafe(["relay:set:SWITCHFRONT:ON", "relay:set:SWITCHBACK:ON"], CROSSING_WAIT);
         sendOrQueueSafe([trainRelay(20,0,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
@@ -383,6 +417,23 @@ function receiveMsg(message) {
         compositionAt[trainLocation] = [];
       }
     }
+
+    if (message === "toggle:LOADEE") { // 
+        sendOrQueueSafe([`relay:set:PUMDIRECT:CONVEYOR:45:-20`], SHORT_WAIT);
+        sendOrQueueSafe([`relay:set:PUMDIRECT:CONVEYOR:45:20`], SHORT_WAIT);
+    }
+
+    if (message === "toggle:DEMO") { // 
+        ensureFront();
+        sendOrQueueSafe([`relay:toggle:YARD`], 0);
+        sendOrQueueSafe([`relay:toggle:YARD`], 0);
+        sendOrQueueSafe([`relay:toggle:LOADER`], 0);
+        sendOrQueueSafe([`relay:toggle:LOADEE`], 0);
+        sendOrQueueSafe([`relay:toggle:UNLOADER`], 0);
+        sendOrQueueSafe([`relay:toggle:YARD`], 0);
+        sendOrQueueSafe([`relay:toggle:FRONT`], 0);
+    }
+
   }
 
   if (message === "info:BLUE" || message === "info:RED" || message === "info:GREEN" || message === "info:ORANGE") {

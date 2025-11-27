@@ -39,37 +39,45 @@ magick \( ${IMG_DIR}/TRAIN_ON.jpg -modulate 100,80 \) \( -size 80x80 xc:red   \)
 magick \( ${IMG_DIR}/TRAIN_ON.jpg -modulate 100,80 \) \( -size 80x80 xc:green \) -gravity northeast -geometry +20+20 -compose over -composite  ${IMG_DIR}/TRAIN_GREEN.jpg
 
 function train_one () {
+  local i1="${1%%${1#?}}"
 magick \( ${IMG_DIR}/TRAIN_STATION.jpg -modulate 100,80 \) \
-  \( -size 50x20 xc:${1} \) -gravity southeast -geometry +70+20 -compose over \
+             \( -size 50x15 xc:${1} \) -gravity southeast -geometry +70+20 -compose over \
   -composite \( -size 40x20 xc:RED \) -gravity southeast -geometry +20+20 -compose over \
-  -composite  ${IMG_DIR}/TRAINCOMP_RED_${1}.jpg
+  -composite  ${IMG_DIR}/LOADER_COMP_${1}.jpg
 }
 
 function train_two () {
+  local i1="${1%%${1#?}}"
+  local i2="${2%%${2#?}}"
 magick \( ${IMG_DIR}/TRAIN_STATION.jpg -modulate 100,80 \) \
-  \( -size 50x20 xc:${2} \) -gravity southeast -geometry +130+20 -compose over \
-  -composite \( -size 50x20 xc:${1} \) -gravity southeast -geometry +70+20 -compose over \
+             \( -size 50x15 xc:${2} \) -gravity southeast -geometry +130+20 -compose over \
+  -composite \( -size 50x15 xc:${1} \) -gravity southeast -geometry +70+20 -compose over \
   -composite \( -size 40x20 xc:RED \) -gravity southeast -geometry +20+20 -compose over \
-  -composite  ${IMG_DIR}/TRAINCOMP_RED_${1}_${2}.jpg
+  -composite  ${IMG_DIR}/YARD_COMP_${i1}${i2}.jpg
 }
 
-function train_two () {
+function train_three () {
+  local i1="${1%%${1#?}}"
+  local i2="${2%%${2#?}}"
+  local i3="${3%%${3#?}}"
 magick \( ${IMG_DIR}/TRAIN_STATION.jpg -modulate 100,80 \) \
-  \( -size 50x20 xc:${3} \) -gravity southeast -geometry +190+20 -compose over \
-  -composite \( -size 50x20 xc:${2} \) -gravity southeast -geometry +130+20 -compose over \
-  -composite \( -size 50x20 xc:${1} \) -gravity southeast -geometry +70+20 -compose over \
+             \( -size 50x15 xc:${3} \) -gravity southeast -geometry +190+20 -compose over \
+  -composite \( -size 50x15 xc:${2} \) -gravity southeast -geometry +130+20 -compose over \
+  -composite \( -size 50x15 xc:${1} \) -gravity southeast -geometry +70+20 -compose over \
   -composite \( -size 40x20 xc:RED \) -gravity southeast -geometry +20+20 -compose over \
-  -composite  ${IMG_DIR}/TRAINCOMP_RED_${1}_${2}_${3}.jpg
+  -composite  ${IMG_DIR}/TRAIN_COMP_${i1}${i2}${i3}.jpg
 }
 
+train_one GRAY
 train_one WHITE
 train_one BLUE
 train_one YELLOW
 
+train_two GRAY GRAY
 train_two WHITE BLUE
 train_two WHITE YELLOW
 
-train_two WHITE YELLOW BLUE
+train_three GRAY GRAY GRAY
 
 
 magick "${SRC_IMG_DIR}/xmas2023_ - 1.jpeg" -resize 300x ${IMG_DIR}/HOUSE_ON.jpg
@@ -225,3 +233,5 @@ for day in $(seq 1 24); do
     -gravity center -geometry +0+12 -compose over -composite \
     "${outfile}"
 done
+
+echo $IMG_DIR
