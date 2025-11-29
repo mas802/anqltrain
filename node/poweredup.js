@@ -35,19 +35,19 @@ let motorConfig = {
   motor: null,
   state: "OFF",
   degrees: 110,
-  speed: -100,
+  speed: 100,
   led: null,
   mode: "toggle"
 },
 "CONVEYOR" : {
   motor: null,
   state: "OFF",
-  degrees: 45,
-  speed: -20,
+  degrees: 720,
+  speed: -80,
   led: null,
   mode: "normal"
 },
-"LOADERMOTOR" : {
+"LOADEEMOTOR" : {
   motor: null,
   state: "OFF",
   degrees: 45,
@@ -81,9 +81,8 @@ poweredUP.on("discover", async (hub) => {
     console.log(["POWEREDUP INFO connect ", hub.primaryMACAddress, hub.type]);
 
     let hubname = null
-    for (var key in config.hubs) {
-      let hc = config.hubs[key]
-      if ( hc.addr === hub.primaryMACAddress ) {
+    for (var key in config.hubAddr) {
+      if ( config.hubAddr[key] === hub.primaryMACAddress ) {
         hubname = key;
       }
     }
@@ -158,10 +157,17 @@ poweredUP.on("discover", async (hub) => {
 
     } else if (hub.type === PoweredUP.Consts.HubType.MOVE_HUB) {
 
+      let hubled = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
+
+      for (var port in config.movehubConfigs[hubname]) {
+        let motor = config.movehubConfigs[hubname][port].motor;
+        console.log(`config connect ${hubname} port: ${port} to motor ${motor}`);
+        motorConfig[motor].motor = await hub.waitForDeviceAtPort(port);
+        motorConfig[motor].led = hubled;
+      }
+
       if (hub.primaryMACAddress == config["hubAddr"]["CONVEYORHUB"]) {
         console.log(`INFO: Connected to CONVEYORHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
-
-        motorConfig["CONVEYOR"].motor = await hub.waitForDeviceAtPort("B");
 
         led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
         led.setColor(PoweredUP.Consts.Color.YELLOW);
@@ -170,20 +176,20 @@ poweredUP.on("discover", async (hub) => {
         sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
         hub.on("button", (device) => {
-          buttonHandler(device, "SWITCHFRONT", PoweredUP.Consts.ButtonState.PRESSED);
+          buttonHandler(device, "LOADEE", PoweredUP.Consts.ButtonState.PRESSED);
         });
 
         hub.on("colorAndDistance", (device, { color, distance }) => {
-          colorSensorHandler(device, color, distance, "DECOUPLER");
+          colorSensorHandler(device, color, distance, "CONVEYOR");
         });
 
       } else if (hub.primaryMACAddress == config["hubAddr"]["SWITCHHUB"]) {
 
           console.log(`INFO: Connected to SWITCHHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
-          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("D");
+          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("B");
 
-          motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("A");
+          motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("C");
           motorConfig["SWITCHBACK"].led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
           motorConfig["SWITCHBACK"].led.setColor(PoweredUP.Consts.Color.YELLOW);
 
@@ -195,7 +201,7 @@ poweredUP.on("discover", async (hub) => {
           sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
           hub.on("colorAndDistance", (device, { color, distance }) => {
-            colorSensorHandler(device, color, distance, "DECOUPLER");
+            colorSensorHandler(device, color, distance, "SWITCH");
           });
 
       } else if (hub.primaryMACAddress == config["hubAddr"]["DECOUPLERHUB"]) {
@@ -208,7 +214,7 @@ poweredUP.on("discover", async (hub) => {
           motorConfig["DECOUPLERBACK"].motor = await hub.waitForDeviceAtPort("B");
 
           hub.on("button", (device) => {
-            buttonHandler(device, "SWITCHFRONT", PoweredUP.Consts.ButtonState.PRESSED);
+            buttonHandler(device, "DECOUPLER", PoweredUP.Consts.ButtonState.PRESSED);
           });
 
           sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);

@@ -366,7 +366,6 @@ function receiveMsg(message) {
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:`+path], CROSSING_WAIT);
         trainLocation = path;
         compositionAttached.push(...compositionAt[trainLocation]);
-        compositionTo[path].push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
       } else {
         ensureFront();
@@ -421,8 +420,8 @@ function receiveMsg(message) {
     }
 
     if (message === "toggle:LOADEE") { // 
-        sendOrQueueSafe([`relay:set:PUMDIRECT:CONVEYOR:45:-20`], SHORT_WAIT);
-        sendOrQueueSafe([`relay:set:PUMDIRECT:CONVEYOR:45:20`], SHORT_WAIT);
+        sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:45:-20`], SHORT_WAIT);
+        sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:45:20`], SHORT_WAIT);
     }
 
     if (message === "toggle:DEMO") { // 
