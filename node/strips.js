@@ -3,7 +3,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 
 const {
   buildColourDataPacket,
@@ -17,15 +16,15 @@ const config = JSON.parse(fs.readFileSync(configPath));
 const stripDevices = config.strips || {};
 
 const EFFECTS = {
-  fire: async (controller, effectId = 1) => {
+  fire: async (controller, effectId = 7) => {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 55, 80, buildFirePalette());
   },
-  ghost: async (controller, effectId = 2) => {
+  ghost: async (controller, effectId = 7) => {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 45, 80, buildGhostPalette());
   },
-  water: async (controller, effectId = 3) => {
+  water: async (controller, effectId = 0) => {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 50, 70, buildWaterPalette());
   },
@@ -38,6 +37,13 @@ const EFFECTS = {
     await controller.switchOn(false);
   },
 };
+
+function createColorEffect([r, g, b]) {
+  return async (controller) => {
+    await controller.switchOn(true);
+    await controller.setColour(r, g, b);
+  };
+}
 
 function buildFirePalette() {
   return buildColourDataPacket([
@@ -70,7 +76,7 @@ function buildWaterPalette() {
     [0, 20, 40],
     [0, 40, 80],
     [0, 60, 120],
-    [0, 80, 160],
+    [200, 200, 250],
     [0, 110, 200],
     [0, 150, 230],
     [20, 180, 240],
@@ -127,96 +133,9 @@ async function applyEffect(alias, effectName, effectOverride) {
   console.log('Done');
 }
 
-async function main() {
-  await refreshStrips();
-  printHelp();
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: 'lights> ',
-  });
-
-  let busy = false;
-  rl.prompt();
-
-  rl.on('line', async (line) => {
-    const input = line.trim();
-    if (!input) {
-      rl.prompt();
-      return;
-    }
-
-    if (input.toLowerCase() === 'exit' || input.toLowerCase() === 'quit') {
-      rl.close();
-      return;
-    }
-
-    if (input.toLowerCase() === 'help') {
-      printHelp();
-      rl.prompt();
-      return;
-    }
-
-    if (input.toLowerCase() === 'refresh') {
-      await refreshStrips();
-      rl.prompt();
-      return;
-    }
-
-    if (busy) {
-      console.log('Busy processing previous command, please wait...');
-      rl.prompt();
-      return;
-    }
-
-    const parts = input.split(/\s+/);
-    if (parts.length < 2) {
-      console.log('Please provide strip alias and effect, optionally an effect id, e.g. "STRIP1 fire 4".');
-      rl.prompt();
-      return;
-    }
-    const alias = parts[0];
-    const effectName = parts[1];
-    const effectOverride = parts[2] ? Number(parts[2]) : undefined;
-
-    busy = true;
-    try {
-      await applyEffect(alias, effectName, effectOverride);
-    } catch (err) {
-      console.error('Failed to apply effect:', err);
-    } finally {
-      busy = false;
-      rl.prompt();
-    }
-  });
-
-  rl.on('close', async () => {
-    console.log('Exiting lights CLI');
-    await connectionPool.disconnectAll().catch(() => undefined);
-    process.exit(0);
-  });
-}
-
-main().catch((err) => {
-  console.error('lights.js failed:', err);
-  process.exit(1);
-});
-
-function createColorEffect([r, g, b]) {
-  return async (controller) => {
-    await controller.switchOn(true);
-    await controller.setColour(r, g, b);
-  };
-}
-
-function printHelp() {
-  console.log('Commands:');
-  console.log('  STRIP1 fire           -> apply fire effect with default id');
-  console.log('  STRIP2 water 4        -> apply water palette using effect #4');
-  console.log('  refresh               -> rescan strips');
-  console.log('  help                  -> show this help');
-  console.log('  exit                  -> quit');
-  console.log(`Available effects: ${Object.keys(EFFECTS).join(', ')}`);
-  console.log(`Configured strips: ${Object.keys(stripDevices).join(', ') || 'none'}`);
-}
+module.exports = {
+  refreshStrips,
+  applyEffect,
+  stripDevices,
+  EFFECTS,
+};
