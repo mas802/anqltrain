@@ -27,7 +27,7 @@ let motorConfig = {
   motor: null,
   state: "OFF",
   degrees: 110,
-  speed: 100,
+  speed: -100,
   led: null,
   mode: "toggle"
 },
@@ -253,9 +253,9 @@ poweredUP.on("discover", async (hub) => {
 
 async function setMotor(mconfig, goal) {
   if (!mconfig.motor) { console.log("WARN: motor missing"); return; }
-  if (mconfig.state != goal) {
+  // if (mconfig.state != goal) {
     return await toggleMotor(mconfig);
-  }
+  //}
   return;
 }
 

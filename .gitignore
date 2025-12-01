@@ -39,3 +39,4 @@ quarkus/src/main/resources/META-INF/resources/*.html
 quarkus/target/classes/
 quarkus/src/main/resources/META-INF/resources/plan_cam.jpg
 Library/Caches/
+.vscode/settings.json

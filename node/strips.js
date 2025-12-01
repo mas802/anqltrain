@@ -20,6 +20,10 @@ const EFFECTS = {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 55, 80, buildFirePalette());
   },
+  monster: async (controller, effectId = 7) => {
+    await controller.switchOn(true);
+    await controller.setEffect(effectId, 0, 45, 80, buildMonsterPalette());
+  },
   ghost: async (controller, effectId = 7) => {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 45, 80, buildGhostPalette());
@@ -27,6 +31,10 @@ const EFFECTS = {
   water: async (controller, effectId = 0) => {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 50, 70, buildWaterPalette());
+  },
+  rainbow: async (controller, effectId = 1) => {
+    await controller.switchOn(true);
+    await controller.setEffect(effectId, 0, 45, 80, buildRainbowPalette());
   },
   white: createColorEffect([180, 180, 180]),
   blue: createColorEffect([0, 0, 255]),
@@ -58,7 +66,7 @@ function buildFirePalette() {
   ]);
 }
 
-function buildGhostPalette() {
+function buildMonsterPalette() {
   return buildColourDataPacket([
     [0, 30, 0],
     [0, 60, 5],
@@ -68,6 +76,19 @@ function buildGhostPalette() {
     [90, 230, 110],
     [140, 255, 160],
     [100, 200, 120],
+  ]);
+}
+
+function buildGhostPalette() {
+  return buildColourDataPacket([
+    [30, 0, 60],
+    [60, 0, 120],
+    [90, 0, 180],
+    [130, 20, 220],
+    [170, 40, 255],
+    [200, 70, 255],
+    [230, 110, 255],
+    [255, 150, 255],
   ]);
 }
 
@@ -81,6 +102,19 @@ function buildWaterPalette() {
     [0, 150, 230],
     [20, 180, 240],
     [40, 200, 255],
+  ]);
+}
+
+function buildRainbowPalette() {
+  return buildColourDataPacket([
+    [255, 0, 0],
+    [255, 128, 0],
+    [255, 255, 0],
+    [0, 255, 0],
+    [0, 0, 255],
+    [75, 0, 130],
+    [143, 0, 255],
+    [255, 0, 255],
   ]);
 }
 

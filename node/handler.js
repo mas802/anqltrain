@@ -420,8 +420,8 @@ function receiveMsg(message) {
     }
 
     if (message === "toggle:LOADEE") { // 
-        sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:45:-20`], SHORT_WAIT);
-        sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:45:20`], SHORT_WAIT);
+        sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:20`], SHORT_WAIT);
+        sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:-20`], SHORT_WAIT);
     }
 
     if (message === "toggle:DEMO") { // 

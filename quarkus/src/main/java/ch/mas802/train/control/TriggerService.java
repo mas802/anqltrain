@@ -90,23 +90,24 @@ public class TriggerService {
 
     private void initializeAdventGrid() {
         addAdventEntry("TRAIN", 0, "TRAIN", "VMuNEjnc3yk");
+
         addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
-        addAdventEntry("SWITCHFRONT", 2, "SWITCHFRONT");
+        addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT");
         addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
         addAdventEntry("DECOUPLERFRONT", 4, "DECOUPLERFRONT");
 
-        addAdventEntry("LOADER", 3, "LOADER", "https://youtube.com/shorts/a8fP_QiH25g?si=N4v5ZlKRXY38xSgz");
-        addAdventEntry("ALLOFF", 1, "ALLOFF");
-        addAdventEntry("RED", 7, "RED");
-        addAdventEntry("CROSSING", 13, "CROSSING");
+        addAdventEntry("LOADEE", 2, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g?si=N4v5ZlKRXY38xSgz");
+        addAdventEntry("ALLOFF", 20, "ALLOFF");
+        addAdventEntry("DEMO", 7, "DEMO");
+        addAdventEntry("CROSSING", 4, "CROSSING");
 
-        addAdventEntry("HOUSE", 20, "HOUSE");
+        addAdventEntry("HOUSE", 1, "HOUSE" , "https://www.youtube.com/shorts/PST-a_QMF-s");
         addAdventEntry("HOUSE1", 10, "HOUSE1");
         addAdventEntry("HOUSE2", 22, "HOUSE2");
         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
 
         addAdventEntry("TRACK", 8, "TRACK");
-        addAdventEntry("GHOSTBUSTERS", 18, "GHOSTBUSTERS");
+        addAdventEntry("GHOSTBUSTERS", 3, "GHOSTBUSTERS");
         addAdventEntry("FIRE", 15, "FIRE");
         addAdventEntry("CONVEYOR", 23, "CONVEYOR");
 
