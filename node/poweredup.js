@@ -27,7 +27,7 @@ let motorConfig = {
   motor: null,
   state: "OFF",
   degrees: 110,
-  speed: -100,
+  speed: 100,
   led: null,
   mode: "toggle"
 },
@@ -187,7 +187,7 @@ poweredUP.on("discover", async (hub) => {
 
           console.log(`INFO: Connected to SWITCHHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
-          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("B");
+          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("A");
 
           motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("C");
           motorConfig["SWITCHBACK"].led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
@@ -253,24 +253,17 @@ poweredUP.on("discover", async (hub) => {
 
 async function setMotor(mconfig, goal) {
   if (!mconfig.motor) { console.log("WARN: motor missing"); return; }
-  // if (mconfig.state != goal) {
-    return await toggleMotor(mconfig);
-  //}
-  return;
-}
-
-async function toggleMotor(mconfig) {
-  if (!mconfig.motor) { console.log("WARN: motor missing"); return; }
   let dir = mconfig.speed;
-  if (mconfig.state == "OFF") {
-    mconfig.state = "ON";
-  } else {
-    mconfig.state = "OFF";
-    if (mconfig.mode == "toggle") dir = -dir;
-  }
+  if (goal === "OFF" && mconfig.mode == "toggle") dir = -dir;
+  mconfig.state = goal;
   // console.log("set motor to: " + [mconfig.state, mconfig.speed, dir])
   return await mconfig.motor.rotateByDegrees(mconfig.degrees, dir)
       .catch(e => {console.warn([e, new Date().toISOString() + " motor to far", mconfig])});
+}
+
+async function toggleMotor(mconfig) {
+  const goal = (mconfig.state == "OFF") ? "ON" : "OFF";
+  return await setMotor(mconfig, goal);
 }
 
 async function runMotor(mconfig, degrees, speed) {

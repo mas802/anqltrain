@@ -30,7 +30,7 @@ const EFFECTS = {
   },
   water: async (controller, effectId = 0) => {
     await controller.switchOn(true);
-    await controller.setEffect(effectId, 0, 50, 70, buildWaterPalette());
+    await controller.setEffect(effectId, 1, 50, 70, buildWaterPalette());
   },
   rainbow: async (controller, effectId = 1) => {
     await controller.switchOn(true);
