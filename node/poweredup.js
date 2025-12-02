@@ -18,6 +18,7 @@ let remoteButtonRight = null;
 let remoteLed = null;
 
 let lastColorAt = [];
+const activeHubs = new Set();
 
 // Remote configurations now loaded from config.json
 let hubConfigs = config.remoteConfigs;
@@ -76,9 +77,32 @@ let motorConfig = {
 poweredUP.on("discover", async (hub) => {
 
     // console.log("discovered: " + hub.type);
+    const hubId = hub.uuid || hub.primaryMACAddress;
+    if (hubId && activeHubs.has(hubId)) {
+      console.log(["POWEREDUP INFO skip duplicate discovery", hubId, hub.type]);
+      return;
+    }
+    if (hubId) {
+      activeHubs.add(hubId);
+    }
+    const releaseHub = () => {
+      if (hubId && activeHubs.has(hubId)) {
+        activeHubs.delete(hubId);
+      }
+    };
 
-    await hub.connect().catch(e => {console.warn([e, new Date().toISOString() + " bt connect issue"])});
+    try {
+      await hub.connect();
+    } catch (e) {
+      console.warn([e, new Date().toISOString() + " bt connect issue", { hubId, type: hub.type }]);
+      releaseHub();
+      return;
+    }
     console.log(["POWEREDUP INFO connect ", hub.primaryMACAddress, hub.type]);
+    hub.on("disconnect", () => {
+      releaseHub();
+      console.log("disconnect hub " + (hub.primaryMACAddress || hub.uuid || hub.type));
+    });
 
     let hubname = null
     for (var key in config.hubAddr) {
@@ -237,9 +261,7 @@ poweredUP.on("discover", async (hub) => {
 */
         }
 
-        hub.on("disconnect", () => {
-          console.log("disconnect move hub");
-        });
+
     } else {
           console.log("UNKONW hub " + hub.primaryMACAddress);
           hub.disconnect();

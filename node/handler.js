@@ -50,7 +50,7 @@ let lastColorAction = "NONE";
 let lastDetectionColor = "NONE";
 const colorActions = ["BLUE", "RED", "GREEN"];
 
-const FULL_ROUND = 8000;
+const FULL_ROUND = 10000;
 const HALF_ROUND = 3100;
 const QUARTER_ROUND = colorDetectionTimeout+10;
 const CROSSING_WAIT = 1500;
@@ -425,7 +425,7 @@ function receiveMsg(message) {
       }
     }
 
-    if (message === "toggle:LOADEE") { // 
+    if (message === "toggle:LOADEE") { // TODO check COLOR
         sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:20`], SHORT_WAIT);
         sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:-20`], SHORT_WAIT);
     }

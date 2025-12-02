@@ -84,6 +84,10 @@ magick "${SRC_IMG_DIR}/IMG_0755.jpeg" -resize 300x -crop 300x226+0+160 ${IMG_DIR
 magick "${SRC_IMG_DIR}/IMG_0756.jpeg" -resize 300x -crop 300x226+0+160 ${IMG_DIR}/HOUSE_OFF.jpg
 common_pics HOUSE
 
+magick "${SRC_IMG_DIR}/IMG_0767.jpeg" -resize 300x -crop 300x226+0+160 ${IMG_DIR}/WATER_ON.jpg
+magick "${SRC_IMG_DIR}/IMG_0765.jpeg" -resize 300x -crop 300x226+0+160 ${IMG_DIR}/WATER_OFF.jpg
+common_pics WATER
+
 # magick "${SRC_IMG_DIR}/xmas2023_ - 8.jpeg" -resize 300x -crop 300x226+0+20 ${IMG_DIR}/TRACK_ON.jpg
 # magick "${SRC_IMG_DIR}/xmas2023_ - 7.jpeg" -resize 300x -crop 300x226+0+20 -modulate 100,50 ${IMG_DIR}/TRACK_OFF.jpg
 # common_pics TRACK
