@@ -92,9 +92,9 @@ public class WsService {
             System.out.println("triggerOrToggle: " + key + " - " + status.state + " to " + targetState);
 
             return triggerService.handleTrigger(key + ":" + targetState)
-                .map(message -> {
+                .map(messages -> {
                     System.out.println("triggerOrToggle DO: " + key + " - " + status.state + " to " + targetState);
-                    broadcast(message);
+                    messages.forEach(this::broadcast);
                     statusRepository.updateStatus(key, targetState, 2000, status.data);
                     return new Status("load", until * 2, until, status.data);
                 })

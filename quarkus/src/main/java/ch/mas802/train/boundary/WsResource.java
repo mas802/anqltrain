@@ -66,7 +66,8 @@ public class WsResource {
         } else if ("trigger".equals(command)) {
             int prefixEnd = message.indexOf(':');
             if (prefixEnd >= 0 && message.length() > prefixEnd + 1) {
-                triggerService.handleTrigger(message.substring(prefixEnd + 1)).ifPresent(wsService::broadcast);
+                triggerService.handleTrigger(message.substring(prefixEnd + 1))
+                    .ifPresent(cmds -> cmds.forEach(wsService::broadcast));
             }
         } else {
             // wsService.broadcast(">> " + clientname + ": " + message + ": " + cmd[0] + ": " + cmd.length);

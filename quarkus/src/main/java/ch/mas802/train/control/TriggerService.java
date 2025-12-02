@@ -5,6 +5,7 @@ import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,7 @@ public class TriggerService {
         }
     }
 
-    Map<String, String> triggers = new ConcurrentHashMap<>();
+    Map<String, List<String>> triggers = new ConcurrentHashMap<>();
     Map<String, AdventEntry> adventGrid = new HashMap<>();
     
     public TriggerService() {
@@ -34,23 +35,26 @@ public class TriggerService {
         initializeAdventGrid();
     }
 
-    public Optional<String> handleTrigger(String trigger) {
+    public Optional<List<String>> handleTrigger(String trigger) {
         System.out.println("handleTrigger: " + trigger);
         
         // Simple lookup: trigger string -> message to send
-        String message = triggers.get(trigger);
+        List<String> messages = triggers.get(trigger);
         
-        if (message != null) {
-            System.out.println("Executing trigger action: " + message);
-            return Optional.of(message);
+        if (messages != null && !messages.isEmpty()) {
+            messages.forEach(message -> System.out.println("Executing trigger action: " + message));
+            return Optional.of(messages);
         } else {
             System.out.println("No trigger mapping found for: " + trigger);
             return Optional.empty(); // CHECK maybe toggle here
         }
     }
     
-    public void registerTrigger(String key, String action) {
-        triggers.put(key, action);
+    public void registerTrigger(String key, String... actions) {
+        if (actions == null || actions.length == 0) {
+            throw new IllegalArgumentException("At least one action must be provided for trigger " + key);
+        }
+        triggers.put(key, List.of(actions));
     }
     
     public void clearTriggers() {
@@ -64,29 +68,33 @@ public class TriggerService {
     public void initialize() {
         // Fill triggers map with mappings from remoteConfigs
         // REMOTE2 LEFT button
-        triggers.put("REMOTE2:LEFT:UP", "toggle:SWITCHFRONT");
-        triggers.put("REMOTE2:LEFT:STOP", "toggle:BLUE");
-        triggers.put("REMOTE2:LEFT:DOWN", "toggle:SWITCHBACK");
+        registerTrigger("REMOTE2:LEFT:UP", "toggle:SWITCHFRONT");
+        registerTrigger("REMOTE2:LEFT:STOP", "toggle:BLUE");
+        registerTrigger("REMOTE2:LEFT:DOWN", "toggle:SWITCHBACK");
         
         // REMOTE2 RIGHT button
-        triggers.put("REMOTE2:RIGHT:UP", "toggle:DECOUPLERBACK");
-        triggers.put("REMOTE2:RIGHT:STOP", "toggle:CONVEYOR");
-        triggers.put("REMOTE2:RIGHT:DOWN", "toggle:DECOUPLERFRONT");
+        registerTrigger("REMOTE2:RIGHT:UP", "toggle:DECOUPLERBACK");
+        registerTrigger("REMOTE2:RIGHT:STOP", "toggle:CONVEYOR");
+        registerTrigger("REMOTE2:RIGHT:DOWN", "toggle:DECOUPLERFRONT");
 
-        triggers.put("SIGNAL1:ON",  "set:SIGNAL1:OFF");
-        triggers.put("SIGNAL1:OFF", "set:SIGNAL1:ON");
+        registerTrigger("SIGNAL1:ON",  "set:SIGNAL1:OFF");
+        registerTrigger("SIGNAL1:OFF", "set:SIGNAL1:ON");
 
-        triggers.put("CONTROL2:ON",  "set:SWITCHFRONT:ON");
-        triggers.put("CONTROL2:OFF", "set:SWITCHFRONT:OFF");
+        registerTrigger("CONTROL2:ON",  "set:SWITCHFRONT:ON");
+        registerTrigger("CONTROL2:OFF", "set:SWITCHFRONT:OFF");
 
-        triggers.put("CONTROL3:ON",  "set:PUMDIRECT:CONVEYOR:45:-20");
-        triggers.put("CONTROL3:OFF", "set:PUMDIRECT:CONVEYOR:45:20");
+        registerTrigger("CONTROL3:ON",  "set:PUMDIRECT:CONVEYOR:45:-20");
+        registerTrigger("CONTROL3:OFF", "set:PUMDIRECT:CONVEYOR:45:20");
 
-        triggers.put("CONTROL4:ON",  "set:MOTORDIRECT:10:3:100:103");
-        triggers.put("CONTROL4:OFF", "set:MOTORDIRECT:20:3:100:103");
+        registerTrigger("CONTROL4:ON",  "set:MOTORDIRECT:10:3:100:103");
+        registerTrigger("CONTROL4:OFF", "set:MOTORDIRECT:20:3:100:103");
 
-        triggers.put("WATER:ON",  "set:STRIP1:water");
-        triggers.put("WATER:OFF", "set:STRIP1:off");
+        registerTrigger("WATER:ON",  "set:STRIP1:water");
+        registerTrigger("WATER:OFF", "set:STRIP1:off");
+
+        registerTrigger("MONSTER:ON",  "set:MONSTEREYES:ON", "set:STRIP1:monster");
+        registerTrigger("MONSTER:OFF", "set:MONSTEREYES:OFF", "set:STRIP1:off");
+
 
         System.out.println("Initialized " + triggers.size() + " triggers");
     }
@@ -97,9 +105,9 @@ public class TriggerService {
         addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
         addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT");
         addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
-        addAdventEntry("DECOUPLERFRONT", 4, "DECOUPLERFRONT");
+        addAdventEntry("DECOUPLERFRONT", 17, "DECOUPLERFRONT");
 
-        addAdventEntry("LOADEE", 3, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g?si=N4v5ZlKRXY38xSgz");
+        addAdventEntry("LOADEE", 4, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g");
         addAdventEntry("ALLOFF", 20, "ALLOFF");
         addAdventEntry("DEMO", 7, "DEMO");
         addAdventEntry("WATER", 2, "WATER", "https://www.youtube.com/shorts/89L8v_7sH50");
@@ -114,7 +122,7 @@ public class TriggerService {
         addAdventEntry("FIRE", 15, "FIRE");
         addAdventEntry("CONVEYOR", 23, "CONVEYOR");
 
-        addAdventEntry("MONSTER", 17, "MONSTER");
+        addAdventEntry("MONSTER", 3, "MONSTER", "https://www.youtube.com/shorts/veXRwgu2lms");
         addAdventEntry("CAVE", 5, "CAVE");
         addAdventEntry("GUGGE", 19, "GUGGE");
         addAdventEntry("DRAGON", 9, "DRAGON");
