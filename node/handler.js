@@ -282,7 +282,7 @@ function handleDecouplerAction(splitLength, decoupler) {
 
   const decouplerRelay = `relay:set:${decoupler}`;
 
-  sendOrQueueSafe([trainRelay(20,0,BOOST_WAIT)], BOOST_WAIT);
+  sendOrQueueSafe([trainRelay(20,2,BOOST_WAIT)], BOOST_WAIT);
   sendOrQueueSafe([`${decouplerRelay}:ON`], CROSSING_WAIT);
   sendOrQueueSafe([trainRelay(10,100,BOOST_WAIT)], BOOST_WAIT);
   sendOrQueueSafe([`${decouplerRelay}:OFF`, trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
@@ -368,7 +368,7 @@ function receiveMsg(message) {
 
     if (message === "toggle:BLUE" || message === "toggle:TRAIN" || message === "toggle:FRONT") {
       if (trainLocation === STATIONS.FRONT) {
-        sendOrQueueSafe([trainRelay(20,0,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:`+path], CROSSING_WAIT);
         trainLocation = path;
         compositionAttached.push(...compositionAt[trainLocation]);
@@ -387,7 +387,7 @@ function receiveMsg(message) {
       } else {
         ensureFront();
         sendOrQueueSafe(["relay:set:SWITCHBACK:OFF"], CROSSING_WAIT);
-        sendOrQueueSafe([trainRelay(20,0,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:UNLOADER`], CROSSING_WAIT);
         trainLocation = STATIONS.UNLOADER;
         path = STATIONS.UNLOADER;
@@ -400,8 +400,8 @@ function receiveMsg(message) {
         compositionAt[STATIONS.YARD] = handleDecouplerAction(2, "DECOUPLERFRONT");
       } else {
         ensureFront();
-        sendOrQueueSafe(["relay:set:SWITCHFRONT:ON", "relay:set:SWITCHBACK:OFF"], CROSSING_WAIT);
-        sendOrQueueSafe([trainRelay(20,0,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe(["relay:set:SWITCHFRONT:OFF", "relay:set:SWITCHBACK:ON"], CROSSING_WAIT);
+        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:YARD`], CROSSING_WAIT);
         trainLocation = STATIONS.YARD;
         path = STATIONS.YARD;
@@ -415,8 +415,8 @@ function receiveMsg(message) {
         compositionAt[STATIONS.LOADER] = handleDecouplerAction(1, "DECOUPLERBACK");
       } else {
         ensureFront();
-        sendOrQueueSafe(["relay:set:SWITCHFRONT:OFF", "relay:set:SWITCHBACK:OFF"], CROSSING_WAIT);
-        sendOrQueueSafe([trainRelay(20,0,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe(["relay:set:SWITCHFRONT:ON", "relay:set:SWITCHBACK:ON"], CROSSING_WAIT);
+        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
         trainLocation = STATIONS.LOADER;
         path = STATIONS.LOADER;

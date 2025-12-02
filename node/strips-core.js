@@ -242,30 +242,40 @@ async function disconnectPeripheral(peripheral) {
   });
 }
 
-async function scanForDevices(durationMs, filterFn = () => true, allowDuplicates = false) {
-  await waitForPoweredOn();
-  const devices = new Map();
-  const onDiscover = (peripheral) => {
-    if (filterFn(peripheral)) {
-      devices.set(peripheral.id, peripheral);
+const discoveredPeripherals = new Map();
+const identifierIndex = new Map();
+let scannerInitialized = false;
+
+const rememberPeripheral = (peripheral) => {
+  discoveredPeripherals.set(peripheral.id, peripheral);
+  deviceIdentifiers(peripheral).forEach((id) => {
+    if (id) {
+      identifierIndex.set(id, peripheral);
     }
-  };
-  noble.on('discover', onDiscover);
-  try {
-    await new Promise((resolve, reject) => {
-      noble.startScanning([], allowDuplicates, (err) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        setTimeout(resolve, durationMs);
-      });
-    });
-  } finally {
-    noble.stopScanning();
-    noble.off('discover', onDiscover);
+  });
+};
+
+noble.on('discover', rememberPeripheral);
+
+async function ensureContinuousScan() {
+  await waitForPoweredOn();
+  if (scannerInitialized) {
+    return;
   }
-  return Array.from(devices.values());
+  scannerInitialized = true;
+  const start = () => {
+    noble.startScanning([], true, (err) => {
+      if (err) {
+        console.warn('noble startScanning error:', err.message);
+      }
+    });
+  };
+  start();
+  noble.on('scanStop', () => {
+    if (noble.state === 'poweredOn') {
+      setTimeout(start, 200);
+    }
+  });
 }
 
 async function waitForPoweredOn() {
@@ -356,8 +366,17 @@ function indexPeripherals(peripherals) {
 
 async function scanCommand() {
   console.log('Scanning for devices');
-  const devices = await scanForDevices(5000, () => true);
-  const matches = devices.filter(isTargetPeripheral);
+  await ensureContinuousScan();
+  await delay(2000);
+  const seen = new Set();
+  const matches = [];
+  for (const peripheral of discoveredPeripherals.values()) {
+    if (seen.has(peripheral.id)) continue;
+    seen.add(peripheral.id);
+    if (isTargetPeripheral(peripheral)) {
+      matches.push(peripheral);
+    }
+  }
   if (!matches.length) {
     console.log('No devices found');
     return;
@@ -399,14 +418,15 @@ async function dumpGattTable(peripheral) {
 }
 
 async function buildDeviceIndex() {
-  const devices = await scanForDevices(3000, isTargetPeripheral, true);
-  return { devices, index: indexPeripherals(devices) };
+  await ensureContinuousScan();
+  const devices = Array.from(discoveredPeripherals.values());
+  return { devices, index: new Map(identifierIndex) };
 }
 
 async function findDevice(identifier) {
   if (!identifier) return null;
-  const { index } = await buildDeviceIndex();
-  return index.get(identifier.toLowerCase()) || null;
+  await ensureContinuousScan();
+  return identifierIndex.get(identifier.toLowerCase()) || null;
 }
 
 async function dumpCommand(identifier) {

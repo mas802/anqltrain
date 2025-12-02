@@ -18,7 +18,47 @@ let remoteButtonRight = null;
 let remoteLed = null;
 
 let lastColorAt = [];
-const activeHubs = new Set();
+const activeHubs = new Map(); // hubId -> {status, started, lastLog}
+const DUPLICATE_LOG_INTERVAL = 2000;
+const CONNECT_STALE_MS = 10000;
+
+function shouldSkipDiscovery(hubId, hubType) {
+  if (!hubId) return false;
+  const entry = activeHubs.get(hubId);
+  if (!entry) return false;
+  const now = Date.now();
+  if (entry.status === "connecting" && now - entry.started > CONNECT_STALE_MS) {
+    activeHubs.delete(hubId);
+    return false;
+  }
+  if (!entry.lastLog || (now - entry.lastLog) > DUPLICATE_LOG_INTERVAL) {
+    console.log(["POWEREDUP INFO skip duplicate discovery", hubId, hubType]);
+    entry.lastLog = now;
+  }
+  return true;
+}
+
+function rememberHub(hubId) {
+  if (!hubId) return;
+  activeHubs.set(hubId, { status: "connecting", started: Date.now(), lastLog: 0 });
+}
+
+function markHubConnected(hubId) {
+  if (!hubId) return;
+  const entry = activeHubs.get(hubId);
+  const now = Date.now();
+  if (entry) {
+    entry.status = "connected";
+    entry.started = now;
+  } else {
+    activeHubs.set(hubId, { status: "connected", started: now, lastLog: 0 });
+  }
+}
+
+function releaseHubId(hubId) {
+  if (!hubId) return;
+  activeHubs.delete(hubId);
+}
 
 // Remote configurations now loaded from config.json
 let hubConfigs = config.remoteConfigs;
@@ -76,20 +116,12 @@ let motorConfig = {
 
 poweredUP.on("discover", async (hub) => {
 
-    // console.log("discovered: " + hub.type);
     const hubId = hub.uuid || hub.primaryMACAddress;
-    if (hubId && activeHubs.has(hubId)) {
-      console.log(["POWEREDUP INFO skip duplicate discovery", hubId, hub.type]);
+    if (shouldSkipDiscovery(hubId, hub.type)) {
       return;
     }
-    if (hubId) {
-      activeHubs.add(hubId);
-    }
-    const releaseHub = () => {
-      if (hubId && activeHubs.has(hubId)) {
-        activeHubs.delete(hubId);
-      }
-    };
+    rememberHub(hubId);
+    const releaseHub = () => releaseHubId(hubId);
 
     try {
       await hub.connect();
@@ -98,6 +130,7 @@ poweredUP.on("discover", async (hub) => {
       releaseHub();
       return;
     }
+    markHubConnected(hubId);
     console.log(["POWEREDUP INFO connect ", hub.primaryMACAddress, hub.type]);
     hub.on("disconnect", () => {
       releaseHub();
