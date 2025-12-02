@@ -85,6 +85,9 @@ public class TriggerService {
         triggers.put("CONTROL4:ON",  "set:MOTORDIRECT:10:3:100:103");
         triggers.put("CONTROL4:OFF", "set:MOTORDIRECT:20:3:100:103");
 
+        triggers.put("WATER:ON",  "set:STRIP1:water");
+        triggers.put("WATER:OFF", "set:STRIP1:off");
+
         System.out.println("Initialized " + triggers.size() + " triggers");
     }
 
@@ -96,18 +99,18 @@ public class TriggerService {
         addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
         addAdventEntry("DECOUPLERFRONT", 4, "DECOUPLERFRONT");
 
-        addAdventEntry("LOADEE", 2, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g?si=N4v5ZlKRXY38xSgz");
+        addAdventEntry("LOADEE", 3, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g?si=N4v5ZlKRXY38xSgz");
         addAdventEntry("ALLOFF", 20, "ALLOFF");
         addAdventEntry("DEMO", 7, "DEMO");
-        addAdventEntry("CROSSING", 4, "CROSSING");
+        addAdventEntry("WATER", 2, "WATER", "https://www.youtube.com/shorts/89L8v_7sH50");
 
-        addAdventEntry("HOUSE", 1, "HOUSE" , "https://www.youtube.com/shorts/PST-a_QMF-s");
+        addAdventEntry("HOUSE", 1, "HOUSE", "https://www.youtube.com/shorts/PST-a_QMF-s");
         addAdventEntry("HOUSE1", 10, "HOUSE1");
         addAdventEntry("HOUSE2", 22, "HOUSE2");
         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
 
         addAdventEntry("TRACK", 8, "TRACK");
-        addAdventEntry("GHOSTBUSTERS", 3, "GHOSTBUSTERS");
+        addAdventEntry("GHOSTBUSTERS", 13, "GHOSTBUSTERS");
         addAdventEntry("FIRE", 15, "FIRE");
         addAdventEntry("CONVEYOR", 23, "CONVEYOR");
 

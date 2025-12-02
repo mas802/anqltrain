@@ -32,7 +32,7 @@ public class TrainResource {
     @Inject
     TriggerService triggerService;
 
-    List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA");
+    List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA", "WATER");
 
     private static final long TOKEN_MAX_AGE_SECONDS = 10 * 60;
 
