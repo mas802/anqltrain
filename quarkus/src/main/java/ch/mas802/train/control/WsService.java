@@ -68,6 +68,9 @@ public class WsService {
     }
 
     public Status info(final String key) {
+        if (triggerService.handlesKey(key)) {
+            return statusRepository.getStatus(key);
+        }
         return execute(key, "info");
     }
 

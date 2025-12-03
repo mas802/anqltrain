@@ -18,12 +18,12 @@ TwoWayMap.prototype.revGet = function(key){ return this.reverseMap[key]; };
 
 var itemMap = new TwoWayMap({
    'NIX01' : '0',
-   'WARNR' : '1',
+   'HOUSE2' : '1',
    'HOUSE' : '2',
    'MONSTEREYES' : '3',
-   'FIRE' : '4',
+   'FIRETRUCK' : '4',
    'DRAGON' : '5',
-   'NIX' : '6',
+   'TRACK' : '6',
    'CAVE' : '7',
    'SIGNAL3' : '8',
    'SIGNAL3R' : '9',
@@ -32,20 +32,20 @@ var itemMap = new TwoWayMap({
    'SIGNAL1' : '12',
    'SIGNAL1R' : '13',
    'WHITE1' : '14',
-   'NIX15' : '15',
-   'SENSOR3' : '16'
+   'HOUSE2' : '15',
+   'GHOSTBUSTERS' : '16'
 });
 
 var itemMap2 = new TwoWayMap({
    'UNUSED20' : '0',
    'UNUSED21' : '1',
-   'HOUSE1' : '2',
-   'HOUSE2' : '3',
-   'TRACK' : '4',
+   'NIX04' : '2',
+   'NIX03' : '3',
+   'NIX' : '4',
    'HOUSEX' : '5',
    'UNUSED26' : '6',
    'UNUSED27' : '7',
-   'GHOSTBUSTERS' : '8',
+   'NIX08' : '8',
    'UNUSED29' : '9',
    'UNUSED210' : '10',
    'UNUSED211' : '11',

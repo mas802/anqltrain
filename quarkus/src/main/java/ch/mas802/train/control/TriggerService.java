@@ -61,6 +61,14 @@ public class TriggerService {
         triggers.clear();
     }
 
+    public boolean handlesKey(String key) {
+        if (key == null || key.isEmpty()) {
+            return false;
+        }
+        String prefix = key + ":";
+        return triggers.keySet().stream().anyMatch(trigger -> trigger.startsWith(prefix));
+    }
+
     public Map<String, AdventEntry> getAdventGrid() {
         return Collections.unmodifiableMap(adventGrid);
     }
@@ -95,42 +103,40 @@ public class TriggerService {
         registerTrigger("MONSTER:ON",  "set:MONSTEREYES:ON", "set:STRIP1:monster");
         registerTrigger("MONSTER:OFF", "set:MONSTEREYES:OFF", "set:STRIP1:off");
 
+        registerTrigger("FIRE:ON",  "set:FIRETRUCK:ON", "set:STRIP2:fire");
+        registerTrigger("FIRE:OFF", "set:FIRETRUCK:OFF", "set:STRIP2:off");
+
 
         System.out.println("Initialized " + triggers.size() + " triggers");
     }
 
     private void initializeAdventGrid() {
         addAdventEntry("TRAIN", 0, "TRAIN", "VMuNEjnc3yk");
-
-        addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
-        addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT");
-        addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
-        addAdventEntry("DECOUPLERFRONT", 17, "DECOUPLERFRONT");
-
-        addAdventEntry("LOADEE", 4, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g");
-        addAdventEntry("ALLOFF", 20, "ALLOFF");
-        addAdventEntry("DEMO", 7, "DEMO");
-        addAdventEntry("WATER", 2, "WATER", "https://www.youtube.com/shorts/89L8v_7sH50");
-
         addAdventEntry("HOUSE", 1, "HOUSE", "https://www.youtube.com/shorts/PST-a_QMF-s");
-        addAdventEntry("HOUSE1", 10, "HOUSE1");
-        addAdventEntry("HOUSE2", 22, "HOUSE2");
-        addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
-
-        addAdventEntry("TRACK", 8, "TRACK");
-        addAdventEntry("GHOSTBUSTERS", 13, "GHOSTBUSTERS");
-        addAdventEntry("FIRE", 15, "FIRE");
-        addAdventEntry("CONVEYOR", 23, "CONVEYOR");
-
+        addAdventEntry("WATER", 2, "WATER", "https://www.youtube.com/shorts/89L8v_7sH50");
         addAdventEntry("MONSTER", 3, "MONSTER", "https://www.youtube.com/shorts/veXRwgu2lms");
-        addAdventEntry("CAVE", 5, "CAVE");
-        addAdventEntry("GUGGE", 19, "GUGGE");
-        addAdventEntry("DRAGON", 9, "DRAGON");
-
-        addAdventEntry("SIGNAL1", 21, "SIGNAL1");
-        addAdventEntry("SIGNAL2", 11, "SIGNAL2");
+        addAdventEntry("THEFORCE", 4, "THEFORCE");
+        addAdventEntry("LOADEE", 5, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g");
         addAdventEntry("SANTA", 6, "SANTA");
+        addAdventEntry("DEMO", 7, "DEMO");
+    
+         addAdventEntry("TRACK", 8, "TRACK");
+        addAdventEntry("DRAGON", 9, "DRAGON");
+         addAdventEntry("HOUSE1", 10, "HOUSE1");
+        addAdventEntry("SIGNAL2", 11, "SIGNAL2");
+         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
+         addAdventEntry("GHOSTBUSTERS", 13, "GHOSTBUSTERS");
+         addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
+         addAdventEntry("FIRE", 15, "FIRE");
         addAdventEntry("ALLON", 16, "ALLON");
+         addAdventEntry("DECOUPLERFRONT", 17, "DECOUPLERFRONT");
+         addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT");
+        addAdventEntry("GUGGE", 19, "GUGGE");
+        addAdventEntry("ALLOFF", 20, "ALLOFF");
+         addAdventEntry("CAVE", 21, "CAVE");
+         addAdventEntry("HOUSE2", 22, "HOUSE2");
+         addAdventEntry("CONVEYOR", 23, "CONVEYOR");
+         addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
     }
 
     private void addAdventEntry(String key, int day, String action) {

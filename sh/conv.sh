@@ -18,7 +18,13 @@ function common_pics () {
   magick \( ${IMG_DIR}/${1}_ON.jpg  \) $YOUTUBEICON ${IMG_DIR}/${1}_YOUTUBE.jpg
 }
 
-magick "${SRC_IMG_DIR}/xmas2023_ - 12.jpeg" -resize 600x -crop 600x240+0+160 ${IMG_DIR}/TRAIN_ON.jpg
+function quickpic() {
+  magick "${SRC_IMG_DIR}/${2}.jpeg" -resize 300x -crop 300x226+0+${4} ${IMG_DIR}/${1}_ON.jpg
+  magick "${SRC_IMG_DIR}/${3}.jpeg" -resize 300x -crop 300x226+0+${4} ${IMG_DIR}/${1}_OFF.jpg
+  common_pics ${1}
+}
+
+magick "${SRC_IMG_DIR}/IMG_0788.jpeg" -resize 600x -crop 600x240+0+120 ${IMG_DIR}/TRAIN_ON.jpg
 magick \( ${IMG_DIR}/TRAIN_ON.jpg -modulate 100,80  \) ${IMG_DIR}/TRAIN_OFF.jpg
 common_pics TRAIN
 magick \( ${IMG_DIR}/TRAIN_ON.jpg -modulate 100,0  \) ${IMG_DIR}/TRAIN_load.jpg
@@ -91,6 +97,11 @@ common_pics WATER
 magick "${SRC_IMG_DIR}/IMG_0774.jpeg" -resize 300x -crop 300x226+0+80 ${IMG_DIR}/MONSTER_ON.jpg
 magick "${SRC_IMG_DIR}/IMG_0773.jpeg" -resize 300x -crop 300x226+0+80 ${IMG_DIR}/MONSTER_OFF.jpg
 common_pics MONSTER
+
+quickpic LOADER IMG_0784 IMG_0783 100
+quickpic UNLOADER IMG_0800 IMG_0799 80
+quickpic YARD IMG_0781 IMG_0780 80
+quickpic LOADEE IMG_0778 IMG_0777 40
 
 # magick "${SRC_IMG_DIR}/xmas2023_ - 8.jpeg" -resize 300x -crop 300x226+0+20 ${IMG_DIR}/TRACK_ON.jpg
 # magick "${SRC_IMG_DIR}/xmas2023_ - 7.jpeg" -resize 300x -crop 300x226+0+20 -modulate 100,50 ${IMG_DIR}/TRACK_OFF.jpg
