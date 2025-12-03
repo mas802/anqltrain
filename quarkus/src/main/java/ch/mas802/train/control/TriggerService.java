@@ -115,8 +115,8 @@ public class TriggerService {
         addAdventEntry("HOUSE", 1, "HOUSE", "https://www.youtube.com/shorts/PST-a_QMF-s");
         addAdventEntry("WATER", 2, "WATER", "https://www.youtube.com/shorts/89L8v_7sH50");
         addAdventEntry("MONSTER", 3, "MONSTER", "https://www.youtube.com/shorts/veXRwgu2lms");
-        addAdventEntry("THEFORCE", 4, "THEFORCE");
-        addAdventEntry("LOADEE", 5, "LOADEE", "https://youtube.com/shorts/a8fP_QiH25g");
+        addAdventEntry("THEFORCE", 5, "THEFORCE");
+        addAdventEntry("LOADEE", 4, "LOADEE", "https://www.youtube.com/shorts/EJD-zyAX19E");
         addAdventEntry("SANTA", 6, "SANTA");
         addAdventEntry("DEMO", 7, "DEMO");
     
