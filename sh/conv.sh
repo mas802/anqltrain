@@ -19,8 +19,8 @@ function common_pics () {
 }
 
 function quickpic() {
-  magick "${SRC_IMG_DIR}/${2}.jpeg" -resize 300x -crop 300x226+0+${4} ${IMG_DIR}/${1}_ON.jpg
-  magick "${SRC_IMG_DIR}/${3}.jpeg" -resize 300x -crop 300x226+0+${4} ${IMG_DIR}/${1}_OFF.jpg
+  magick "${SRC_IMG_DIR}/${2}" -resize 300x -crop 300x226+0+${4} ${IMG_DIR}/${1}_ON.jpg
+  magick "${SRC_IMG_DIR}/${3}" -resize 300x -crop 300x226+0+${4} ${IMG_DIR}/${1}_OFF.jpg
   common_pics ${1}
 }
 
@@ -98,10 +98,19 @@ magick "${SRC_IMG_DIR}/IMG_0774.jpeg" -resize 300x -crop 300x226+0+80 ${IMG_DIR}
 magick "${SRC_IMG_DIR}/IMG_0773.jpeg" -resize 300x -crop 300x226+0+80 ${IMG_DIR}/MONSTER_OFF.jpg
 common_pics MONSTER
 
-quickpic LOADER IMG_0784 IMG_0783 100
-quickpic UNLOADER IMG_0800 IMG_0799 80
-quickpic YARD IMG_0781 IMG_0780 80
-quickpic LOADEE IMG_0778 IMG_0777 40
+quickpic LOADER IMG_0784.jpeg IMG_0783.jpeg 100
+cp ${IMG_DIR}/LOADER_OFF.jpg ${IMG_DIR}/LOADER_COMP_.jpg
+cp ${IMG_DIR}/LOADER_ON.jpg ${IMG_DIR}/LOADER_COMP_G.jpg
+
+quickpic YARD IMG_0781.jpeg IMG_0780.jpeg 80
+cp ${IMG_DIR}/YARD_OFF.jpg ${IMG_DIR}/YARD_COMP_.jpg
+cp ${IMG_DIR}/YARD_ON.jpg ${IMG_DIR}/YARD_COMP_GG.jpg
+
+quickpic UNLOADER IMG_0800.jpeg IMG_0799.jpeg 80
+quickpic LOADEE IMG_0778.jpeg IMG_0777.jpeg 40
+
+quickpic THEFORCE starwarson.png starwarsoff.png 0
+
 
 # magick "${SRC_IMG_DIR}/xmas2023_ - 8.jpeg" -resize 300x -crop 300x226+0+20 ${IMG_DIR}/TRACK_ON.jpg
 # magick "${SRC_IMG_DIR}/xmas2023_ - 7.jpeg" -resize 300x -crop 300x226+0+20 -modulate 100,50 ${IMG_DIR}/TRACK_OFF.jpg

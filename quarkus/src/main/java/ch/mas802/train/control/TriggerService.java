@@ -106,6 +106,9 @@ public class TriggerService {
         registerTrigger("FIRE:ON",  "set:FIRETRUCK:ON", "set:STRIP2:fire");
         registerTrigger("FIRE:OFF", "set:FIRETRUCK:OFF", "set:STRIP2:off");
 
+        registerTrigger("THEFORCE:ON",  "toggle:UNLOADER");
+        registerTrigger("THEFORCE:OFF", "toggle:UNLOADER");
+
 
         System.out.println("Initialized " + triggers.size() + " triggers");
     }
@@ -115,7 +118,7 @@ public class TriggerService {
         addAdventEntry("HOUSE", 1, "HOUSE", "https://www.youtube.com/shorts/PST-a_QMF-s");
         addAdventEntry("WATER", 2, "WATER", "https://www.youtube.com/shorts/89L8v_7sH50");
         addAdventEntry("MONSTER", 3, "MONSTER", "https://www.youtube.com/shorts/veXRwgu2lms");
-        addAdventEntry("THEFORCE", 5, "THEFORCE");
+        addAdventEntry("THEFORCE", 5, "THEFORCE", "https://www.youtube.com/shorts/mqlW0Mv2PFg");
         addAdventEntry("LOADEE", 4, "LOADEE", "https://www.youtube.com/shorts/EJD-zyAX19E");
         addAdventEntry("SANTA", 6, "SANTA");
         addAdventEntry("DEMO", 7, "DEMO");
