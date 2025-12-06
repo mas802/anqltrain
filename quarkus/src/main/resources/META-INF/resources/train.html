@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>XMAS TRAIN</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<main>
+<div class="wrapper">
+  <div class="train box full"><xmas-start data-label="TRAIN"/></div>
+
+  <div class="box thirdleft"><xmas-start data-label="PLAN_LOADER"></xmas-start></div>
+  <div class="box thirdmiddle"><xmas-start data-label="PLAN_LOADEE"></xmas-start></div>
+  <div class="box thirdright"><xmas-start data-label="PLAN_DEMO"></xmas-start></div>
+
+  <div class="box thirdleft"><xmas-start data-label="PLAN_YARD"></xmas-start></div>
+  <div class="box thirdmiddle"><xmas-start data-label="PLAN_SWITCHBACK"></xmas-start></div>
+  <div class="box thirdright"><xmas-start data-label="PLAN_UNLOADER"></xmas-start></div>
+
+  <div class="box thirdleft"><xmas-start data-label="PLAN_FRONT"></xmas-start></div>
+  <div class="box thirdmiddle"><xmas-start data-label="PLAN_SWITCHFRONT"></xmas-start></div>
+  <div class="box thirdright"><xmas-start data-label="PLAN_CURVE"></xmas-start></div>
+
+  <div class="box halfleft">
+    <a href="https://www.facebook.com/groups/1123376876449124/"><img class="imgw" src="imgs/facebook.png" title="facebook"/></a>
+  </div>
+  <div class="box halfright">
+    <a href="https://github.com/mas802/anqltrain"><img class="imgw" src="imgs/github.jpg" title="github"/></a>
+  </div>
+</div>
+
+</main>
+<script src="app.js" type="module"></script>
+<script type="module">
+(() => {
+  if (typeof document === 'undefined' || typeof customElements === 'undefined') {
+    return;
+  }
+  const EVENT_NAME = 'xmas-start:state-change';
+  const requestRefreshForTiles = source => {
+    document.querySelectorAll('xmas-start').forEach(tile => {
+      if (tile === source || typeof tile.infoCallback !== 'function') {
+        return;
+      }
+      tile.__suppressGlobalTileSync = true;
+      Promise.resolve(tile.infoCallback())
+        .catch(() => {})
+        .finally(() => {
+          tile.__suppressGlobalTileSync = false;
+          tile.__lastRenderedState = tile.state;
+        });
+    });
+  };
+
+  customElements.whenDefined('xmas-start').then(() => {
+    const StartView = customElements.get('xmas-start');
+    if (!StartView || StartView.__globalTileSyncInstalled || typeof StartView.prototype.update !== 'function') {
+      return;
+    }
+    const originalUpdate = StartView.prototype.update;
+    StartView.prototype.update = function patchedUpdate(...args) {
+      const previousState = this.__lastRenderedState;
+      const result = originalUpdate.apply(this, args);
+      if (!this.__suppressGlobalTileSync && typeof previousState !== 'undefined' && previousState !== this.state) {
+        document.dispatchEvent(new CustomEvent(EVENT_NAME, {
+          detail: { source: this, state: this.state }
+        }));
+      }
+      this.__lastRenderedState = this.state;
+      return result;
+    };
+
+    document.addEventListener(EVENT_NAME, event => {
+      requestRefreshForTiles(event.detail?.source || null);
+    });
+    StartView.__globalTileSyncInstalled = true;
+  });
+})();
+</script>
+</body>
+</html>

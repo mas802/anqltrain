@@ -85,6 +85,81 @@ train_two WHITE YELLOW
 
 train_three GRAY GRAY GRAY
 
+# PLAN
+
+function plan () {
+SIZE=69x41
+SIZEH=41x69
+magick \( ${SRC_IMG_DIR}/PLAN.png \) \
+             \( -size $SIZE xc:${2} \) -gravity northwest -geometry +444+150 -compose over \
+  -composite \( -size $SIZE xc:${3} \) -gravity northwest -geometry +364+150 -compose over \
+  -composite \( -size $SIZE xc:${4} \) -gravity northwest -geometry +284+150 -compose over \
+  -composite \( -size $SIZE xc:${5} \) -gravity northwest -geometry +204+150 -compose over \
+  -composite \( -size $SIZE xc:${6} \) -gravity northwest -geometry +350+505 -compose over \
+  -composite \( -size $SIZE xc:${7} \) -gravity northwest -geometry +270+505 -compose over \
+  -composite \( -size $SIZE xc:${8} \) -gravity northwest -geometry +190+505 -compose over \
+  -composite \( -size $SIZE xc:${9} \) -gravity northwest -geometry +110+505 -compose over \
+  -composite \( -size $SIZE xc:${10} \) -gravity northwest -geometry +155+930 -compose over \
+  -composite \( -size $SIZE xc:${11} \) -gravity northwest -geometry +235+930 -compose over \
+  -composite \( -size $SIZE xc:${12} \) -gravity northwest -geometry +315+930 -compose over \
+  -composite \( -size $SIZE xc:${13} \) -gravity northwest -geometry +395+930 -compose over \
+  -composite \( -size $SIZEH xc:${14} \) -gravity northwest -geometry +1230+620 -compose over \
+  -composite \( -size $SIZEH xc:${15} \) -gravity northwest -geometry +1230+540 -compose over \
+  -composite \( -size $SIZEH xc:${16} \) -gravity northwest -geometry +1230+460 -compose over \
+  -composite \( -size $SIZEH xc:${17} \) -gravity northwest -geometry +1230+380 -compose over \
+  -composite  ${SRC_IMG_DIR}/PLAN_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}.jpg -resize 300x ${IMG_DIR}/PLAN_${1}.jpg
+
+  magick ${SRC_IMG_DIR}/PLAN_${1}.jpg -crop 3x3@ +repage ${SRC_IMG_DIR}/PLAN_${1}_%02d.png
+  
+  magick ${SRC_IMG_DIR}/PLAN_${1}_00.png -resize 300x ${IMG_DIR}/PLAN_LOADER_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_01.png -resize 300x ${IMG_DIR}/PLAN_LOADEE_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_02.png -resize 300x ${IMG_DIR}/PLAN_DEMO_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_03.png -resize 300x ${IMG_DIR}/PLAN_YARD_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_04.png -resize 300x ${IMG_DIR}/PLAN_SWITCHBACK_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_05.png -resize 300x ${IMG_DIR}/PLAN_UNLOADER_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_06.png -resize 300x ${IMG_DIR}/PLAN_FRONT_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_07.png -resize 300x ${IMG_DIR}/PLAN_SWITCHFRONT_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_08.png -resize 300x ${IMG_DIR}/PLAN_CURVE_${1}.jpg
+}
+
+function plans () {
+local i="${1%%${1#?}}"
+plan "U0${i}" NONE NONE NONE $1 NONE NONE $2 $3 NONE NONE NONE NONE NONE NONE NONE RED
+plan "F0${i}" NONE NONE NONE $1 NONE NONE $2 $3 RED NONE NONE NONE NONE NONE NONE NONE
+
+plan "U1${i}" NONE NONE NONE NONE NONE NONE $2 $3 NONE NONE NONE NONE NONE NONE RED $1 
+plan "F1${i}" NONE NONE NONE NONE NONE NONE $2 $3 RED $1 NONE NONE NONE NONE NONE NONE
+plan "L1${i}" NONE NONE RED $1 NONE NONE $2 $3 NONE NONE NONE NONE NONE NONE NONE NONE
+
+plan "U2${i}" NONE NONE NONE $1 NONE NONE NONE NONE NONE NONE NONE NONE NONE RED $2 $3
+plan "F2${i}" NONE NONE NONE $1 NONE NONE NONE NONE RED $2 $3 NONE NONE NONE NONE NONE
+plan "Y2${i}" NONE NONE NONE $1 NONE RED $2 $3 NONE NONE NONE NONE NONE NONE NONE NONE
+
+plan "U3${i}" NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE RED $2 $3 $1
+plan "F3${i}" NONE NONE NONE NONE NONE NONE NONE NONE RED $2 $3 $1 NONE NONE NONE NONE
+plan "L3${i}" RED $2 $3 $1 NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE
+plan "Y3${i}" NONE NONE NONE NONE RED $2 $3 $1 NONE NONE NONE NONE NONE NONE NONE NONE
+
+}
+
+plan "OFF" NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE
+plan "ON" RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE
+common_pics PLAN
+common_pics PLAN_LOADER
+common_pics PLAN_LOADEE
+common_pics PLAN_DEMO
+common_pics PLAN_YARD
+common_pics PLAN_SWITCHBACK
+common_pics PLAN_UNLOADER
+common_pics PLAN_FRONT
+common_pics PLAN_SWITCHFRONT
+common_pics PLAN_CURVE
+
+plans GRAY GRAY GRAY
+plans BLUE WHITE YELLOW
+plans YELLOW BLUE WHITE 
+plans WHITE YELLOW BLUE
 
 magick "${SRC_IMG_DIR}/IMG_0755.jpeg" -resize 300x -crop 300x226+0+160 ${IMG_DIR}/HOUSE_ON.jpg
 magick "${SRC_IMG_DIR}/IMG_0756.jpeg" -resize 300x -crop 300x226+0+160 ${IMG_DIR}/HOUSE_OFF.jpg
@@ -111,6 +186,9 @@ quickpic LOADEE IMG_0778.jpeg IMG_0777.jpeg 40
 
 quickpic THEFORCE starwarson.png starwarsoff.png 0
 
+magick "${SRC_IMG_DIR}/IMG_0851.jpeg" -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SANTA_ON.jpg
+magick ${IMG_DIR}/SANTA_ON.jpg -modulate 100,50 ${IMG_DIR}/SANTA_OFF.jpg
+common_pics SANTA
 
 # magick "${SRC_IMG_DIR}/xmas2023_ - 8.jpeg" -resize 300x -crop 300x226+0+20 ${IMG_DIR}/TRACK_ON.jpg
 # magick "${SRC_IMG_DIR}/xmas2023_ - 7.jpeg" -resize 300x -crop 300x226+0+20 -modulate 100,50 ${IMG_DIR}/TRACK_OFF.jpg
@@ -132,25 +210,21 @@ magick "${SRC_IMG_DIR}/IMG_6968.jpeg" -resize 300x  -crop 300x226+0+140  ${IMG_D
 magick "${SRC_IMG_DIR}/IMG_6971.jpeg" -resize 300x  -crop 300x226+0+140  ${IMG_DIR}/FIRE_OFF.jpg
 common_pics FIRE
 
-magick "${SRC_IMG_DIR}/107_1412/IMGP0958.JPG" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/DRAGON_ON.jpg
-magick "${SRC_IMG_DIR}/107_1412/IMGP0959.JPG" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/DRAGON_OFF.jpg
-common_pics DRAGON
+# magick "${SRC_IMG_DIR}/107_1412/IMGP0958.JPG" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/DRAGON_ON.jpg
+# magick "${SRC_IMG_DIR}/107_1412/IMGP0959.JPG" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/DRAGON_OFF.jpg
+# common_pics DRAGON
 
-magick "${SRC_IMG_DIR}/xmas2023_ - 11.jpeg" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/CONVEYOR_ON.jpg
-magick "${SRC_IMG_DIR}/xmas2023_ - 11.jpeg" -resize x226 -crop 300x226+0+0 -modulate 100,50 ${IMG_DIR}/CONVEYOR_OFF.jpg
-common_pics CONVEYOR
+# magick "${SRC_IMG_DIR}/xmas2023_ - 11.jpeg" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/CONVEYOR_ON.jpg
+# magick "${SRC_IMG_DIR}/xmas2023_ - 11.jpeg" -resize x226 -crop 300x226+0+0 -modulate 100,50 ${IMG_DIR}/CONVEYOR_OFF.jpg
+# common_pics CONVEYOR
 
-magick "${SRC_IMG_DIR}/IMG_6941.jpeg" -resize x325 -crop 300x226+100+30 ${IMG_DIR}/GUGGE_ON.jpg
-magick "${SRC_IMG_DIR}/IMG_6941.jpeg" -resize x325 -crop 300x226+100+30 -modulate 100,50 ${IMG_DIR}/GUGGE_OFF.jpg
-common_pics GUGGE
+# magick "${SRC_IMG_DIR}/IMG_6941.jpeg" -resize x325 -crop 300x226+100+30 ${IMG_DIR}/GUGGE_ON.jpg
+# magick "${SRC_IMG_DIR}/IMG_6941.jpeg" -resize x325 -crop 300x226+100+30 -modulate 100,50 ${IMG_DIR}/GUGGE_OFF.jpg
+# common_pics GUGGE
 
 magick "${SRC_IMG_DIR}/IMG_6947.jpeg" -resize x425 -crop 300x226+0+0 ${IMG_DIR}/CROSSING_ON.jpg
 magick ${IMG_DIR}/CROSSING_ON.jpg -modulate 100,50 ${IMG_DIR}/CROSSING_OFF.jpg
 common_pics CROSSING
-
-magick "${SRC_IMG_DIR}/107_1412/IMGP0967.JPG" -resize x300 -crop 226x300+150+0 ${IMG_DIR}/SANTA_ON.jpg
-magick ${IMG_DIR}/SANTA_ON.jpg -modulate 100,50 ${IMG_DIR}/SANTA_OFF.jpg
-common_pics SANTA
 
 magick "${SRC_IMG_DIR}/IMG_6978.jpeg" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/GHOSTBUSTERS_ON.jpg
 magick ${IMG_DIR}/GHOSTBUSTERS_ON.jpg -modulate 100,50 ${IMG_DIR}/GHOSTBUSTERS_OFF.jpg
@@ -160,33 +234,33 @@ magick "${SRC_IMG_DIR}/xmas2023_ - 4.jpeg" -resize 300x  -crop 300x226+0+0 ${IMG
 magick "${SRC_IMG_DIR}/xmas2023_ - 3.jpeg" -resize 300x  -crop 300x226+0+0 ${IMG_DIR}/CAVE_OFF.jpg
 common_pics CAVE
 
-magick ${SRC_IMG_DIR}/IMG_9503.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL1_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9502.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL1_OFF.jpg
-common_pics SIGNAL1
+# magick ${SRC_IMG_DIR}/IMG_9503.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL1_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9502.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL1_OFF.jpg
+# common_pics SIGNAL1
 
-magick ${SRC_IMG_DIR}/IMG_9508.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL2_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9507.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL2_OFF.jpg
-common_pics SIGNAL2
+# magick ${SRC_IMG_DIR}/IMG_9508.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL2_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9507.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL2_OFF.jpg
+# common_pics SIGNAL2
 
-magick ${SRC_IMG_DIR}/IMG_9517.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL3_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9518.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL3_OFF.jpg
-common_pics SIGNAL3
+# magick ${SRC_IMG_DIR}/IMG_9517.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL3_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9518.jpg -resize 300x -crop 300x226+0+70 ${IMG_DIR}/SIGNAL3_OFF.jpg
+# common_pics SIGNAL3
 
-magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE1_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE1_OFF.jpg
-common_pics WHITE1
+# magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE1_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE1_OFF.jpg
+# common_pics WHITE1
 
-magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE2_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE2_OFF.jpg
-common_pics WHITE2
+# magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE2_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+100 ${IMG_DIR}/WHITE2_OFF.jpg
+# common_pics WHITE2
 
-magick ${SRC_IMG_DIR}/IMG_9474.jpg -resize x226 -crop 300x226+0+120 ${IMG_DIR}/WARN_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9475.jpg -resize x226 -crop 300x226+0+120 ${IMG_DIR}/WARN_OFF.jpg
-common_pics WARN
+# magick ${SRC_IMG_DIR}/IMG_9474.jpg -resize x226 -crop 300x226+0+120 ${IMG_DIR}/WARN_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9475.jpg -resize x226 -crop 300x226+0+120 ${IMG_DIR}/WARN_OFF.jpg
+# common_pics WARN
 
-magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCH_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCH_OFF.jpg
-common_pics SWITCH
+# magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCH_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCH_OFF.jpg
+# common_pics SWITCH
 
 magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCHFRONT_ON.jpg
 magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCHFRONT_OFF.jpg
@@ -196,9 +270,9 @@ magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SW
 magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCHBACK_OFF.jpg
 common_pics SWITCHBACK
 
-magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/DECOUPLER_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x226+6+80 ${IMG_DIR}/DECOUPLER_OFF.jpg
-common_pics DECOUPLER
+# magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/DECOUPLER_ON.jpg
+# magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x226+6+80 ${IMG_DIR}/DECOUPLER_OFF.jpg
+# common_pics DECOUPLER
 
 magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/DECOUPLERBACK_ON.jpg
 magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/DECOUPLERBACK_OFF.jpg
@@ -241,6 +315,7 @@ magick -size 300x226 xc:#822 ${IMG_DIR}/NONE_failed.jpg
 montage ${IMG_DIR}/HOUSE_ON.jpg ${IMG_DIR}/HOUSE1_OFF.jpg ${IMG_DIR}/HOUSE2_ON.jpg ${IMG_DIR}/TRACK_OFF.jpg -geometry +0+0 ${IMG_DIR}/ALLLIGHTS_ON.jpg
 montage ${IMG_DIR}/HOUSE_OFF.jpg ${IMG_DIR}/HOUSE1_ON.jpg ${IMG_DIR}/HOUSE2_OFF.jpg ${IMG_DIR}/TRACK_ON.jpg -geometry +0+0 ${IMG_DIR}/ALLLIGHTS_OFF.jpg
 common_pics ALLLIGHTS
+
 
 # Advent calendar tiles with red background, serif numbers and golden border
 ADVENT_BG_COLOR="#8b0000"

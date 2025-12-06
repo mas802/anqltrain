@@ -331,6 +331,11 @@ var W3CWebSocket = require('websocket').w3cwebsocket;
 var client = new W3CWebSocket('ws://localhost:8080/trainws/handler');
 
 function receiveMsg(message) {
+
+  if (message.startsWith("toggle:PLAN_")) {
+    message = "toggle:" + message.slice("toggle:PLAN_".length);
+  }
+
   cmd = message.split(":");
 //  console.log(" HANDLER Received: '" + message + "' " + cmd + " - " +  queue.length);
 
@@ -348,6 +353,11 @@ function receiveMsg(message) {
 
   if (cmd[0] === "toggle" && cmd[1] === "ALLON") {
     lights.forEach(l => {sendMsg(["relay:set:"+l+":ON"])})
+  }
+
+  if (cmd[0] === "toggle" && cmd[1] === "SANTA" && lights.length) {
+    const light = lights[(Math.random() * lights.length) | 0];
+    sendMsg([`relay:set:${light}:ON`]);
   }
 
   if (cmd[0] === "set" && cmd[1] === "TRAINLOC") {
@@ -454,6 +464,17 @@ function receiveMsg(message) {
 
   if (message === "info:TRAINCOMP") {
     sendMsg(["state:TRAINCOMP:COMP_" + compositionAttached.join("")]);
+  }
+
+  if (message.startsWith("info:PLAN")) {
+    const locationChar = (trainLocation && trainLocation.length ? trainLocation[0] : 'G').toUpperCase();
+    const lengthChar = String(compositionAttached.length);
+    let loaderChar = colorAtLoader && colorAtLoader !== "NONE" ? colorAtLoader[0] : "";
+    if (!loaderChar && compositionAttached.length) {
+      loaderChar = compositionAttached[compositionAttached.length - 1];
+    }
+    const planCode = locationChar + lengthChar + (loaderChar ? loaderChar.toUpperCase() : 'G');
+    sendMsg(["state:"+cmd[1]+":" + planCode]);
   }
 
   if (message === "info:YARD") {
