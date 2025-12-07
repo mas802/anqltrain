@@ -8,11 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import ch.mas802.train.entity.Status;
 import ch.mas802.train.entity.Result;
 import java.util.List;
@@ -32,7 +28,7 @@ public class TrainResource {
     @Inject
     TriggerService triggerService;
 
-    List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA", "WATER");
+    List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA");
 
     private static final long TOKEN_MAX_AGE_SECONDS = 30 * 60;
 

@@ -17,35 +17,35 @@ TwoWayMap.prototype.revGet = function(key){ return this.reverseMap[key]; };
     let BACKWARD_SPEED = FORWARD_SPEED;
 
 var itemMap = new TwoWayMap({
-   'NIX01' : '0',
-   'HOUSEXX' : '1',
+   'DONOTUSE0' : '0',
+   'DONOTUSE1' : '1',
    'HOUSE' : '2',
    'MONSTEREYES' : '3',
    'CAVE' : '4',
    'FIRETRUCK' : '5',
-   'TRACKX' : '6',
-   'CAVEX' : '7',
+   'UNUSED06' : '6',
+   'UNUSED07' : '7',
    'SIGNAL3' : '8',
    'SIGNAL3R' : '9',
-   'SIGNAL2' : '10',
-   'SIGNAL2R' : '11',
-   'SIGNAL1' : '12',
+   'UNUSED10' : '10',
+   'UNUSED11' : '11',
+   'UNUSED12' : '12',
    'GHOSTBUSTERS' : '13',
-   'TRACK' : '14',
-   'HOUSE2' : '15',
-   'NO123' : '16'
+   'TRACK' : '14', // A0
+   'HOUSE2' : '15', // A1
+   'UNUSEDA3' : '16' // A2
 });
 
 var itemMap2 = new TwoWayMap({
    'UNUSED20' : '0',
    'UNUSED21' : '1',
-   'NIX04' : '2',
-   'NIX03' : '3',
-   'NIX' : '4',
-   'HOUSEX' : '5',
+   'UNUSED22' : '2',
+   'UNUSED23' : '3',
+   'UNUSED24' : '4',
+   'UNUSED25' : '5',
    'UNUSED26' : '6',
    'UNUSED27' : '7',
-   'NIX08' : '8',
+   'UNUSED28' : '8',
    'UNUSED29' : '9',
    'UNUSED210' : '10',
    'UNUSED211' : '11',
@@ -167,14 +167,14 @@ readI2C = function() {
       // console.debug(rbuffer);
     });
 
-    i2c1.i2cRead(I2C_ADDR2, 16, rbuffer2, function (err,n) {
-      if (err) {
-        console.log(err);
-        for (i=0; i<16; i++) {
-          rbuffer2[i] = 99;
-        }
-      }
-      // console.debug(rbuffer2);
+    // i2c1.i2cRead(I2C_ADDR2, 16, rbuffer2, function (err,n) {
+    //   if (err) {
+    //     console.log(err);
+    //     for (i=0; i<16; i++) {
+    //       rbuffer2[i] = 99;
+    //     }
+    //   }
+    // console.debug(rbuffer2);
     });
 
   }

@@ -109,7 +109,7 @@ public class TriggerService {
         registerTrigger("THEFORCE:ON",  "toggle:UNLOADER");
         registerTrigger("THEFORCE:OFF", "toggle:UNLOADER");
 
-        registerTrigger("HOUSE1:ON",  "set:STRIP2:on");
+        registerTrigger("HOUSE1:ON",  "set:STRIP2:white");
         registerTrigger("HOUSE1:OFF", "set:STRIP2:off");
 
         registerTrigger("DISCO:ON",  "set:STRIP1:rainbow", "set:STRIP2:rainbow");
@@ -128,23 +128,23 @@ public class TriggerService {
         addAdventEntry("SANTA", 6, "SANTA", "https://www.youtube.com/shorts/pipAMLV4u-E");
         addAdventEntry("PLAN", 7, "PLAN");
     
-         addAdventEntry("TRACK", 8, "TRACK");
-        addAdventEntry("DRAGON", 9, "DRAGON");
-         addAdventEntry("HOUSE1", 10, "HOUSE1");
-        addAdventEntry("SIGNAL2", 11, "SIGNAL2");
-         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
-         addAdventEntry("GHOSTBUSTERS", 13, "GHOSTBUSTERS");
-         addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
-         addAdventEntry("FIRE", 15, "FIRE");
-        addAdventEntry("ALLON", 16, "ALLON");
-         addAdventEntry("DECOUPLERFRONT", 17, "DECOUPLERFRONT");
-         addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT");
-        addAdventEntry("GUGGE", 19, "GUGGE");
-        addAdventEntry("ALLOFF", 20, "ALLOFF");
-         addAdventEntry("CAVE", 21, "CAVE");
-         addAdventEntry("HOUSE2", 22, "HOUSE2");
-         addAdventEntry("CONVEYOR", 23, "CONVEYOR");
-         addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
+        addAdventEntry("TRACK", 8, "TRACK");
+        addAdventEntry("CAVE", 9, "CAVE");
+        addAdventEntry("HOUSE1", 10, "HOUSE1");
+                addAdventEntry("SIGNAL2", 11, "SIGNAL2");
+        addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS");
+            addAdventEntry("GHOSTBUSTERS", 13, "GHOSTBUSTERS");
+                addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK");
+            addAdventEntry("FIRE", 15, "FIRE");
+            addAdventEntry("ALLON", 16, "ALLON");
+            addAdventEntry("DECOUPLERFRONT", 17, "DECOUPLERFRONT");
+            addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT");
+            addAdventEntry("GUGGE", 19, "GUGGE");
+            addAdventEntry("ALLOFF", 20, "ALLOFF");
+                addAdventEntry("DRAGON", 21, "DRAGON");
+            addAdventEntry("HOUSE2", 22, "HOUSE2");
+            addAdventEntry("CONVEYOR", 23, "CONVEYOR");
+            addAdventEntry("SWITCHBACK", 24, "SWITCHBACK");
     }
 
     private void addAdventEntry(String key, int day, String action) {

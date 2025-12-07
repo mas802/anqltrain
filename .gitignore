@@ -42,3 +42,5 @@ quarkus/target/classes/
 quarkus/src/main/resources/META-INF/resources/plan_cam.jpg
 Library/Caches/
 .vscode/settings.json
+archive/
+sh/install.sh

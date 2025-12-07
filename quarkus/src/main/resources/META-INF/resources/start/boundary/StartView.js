@@ -40,7 +40,7 @@ img {
     align-items: center;
     justify-content: center;
     font-size: 10pt;
-    color: #fff;
+    color: #560f0fff;
     text-transform: uppercase;
     white-space: nowrap;
     z-index: 0;
