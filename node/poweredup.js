@@ -67,16 +67,16 @@ let motorConfig = {
 "SWITCHFRONT" : {
   motor: null,
   state: "OFF",
-  degrees: 110,
-  speed: 100,
+  degrees: 90,
+  speed: 120,
   led: null,
   mode: "toggle"
 },
 "SWITCHBACK" : {
   motor: null,
   state: "OFF",
-  degrees: 110,
-  speed: 100,
+  degrees: 90,
+  speed: 120,
   led: null,
   mode: "toggle"
 },
@@ -244,9 +244,9 @@ poweredUP.on("discover", async (hub) => {
 
           console.log(`INFO: Connected to SWITCHHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
-          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("A");
+          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("C");
 
-          motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("C");
+          motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("A");
           motorConfig["SWITCHBACK"].led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
           motorConfig["SWITCHBACK"].led.setColor(PoweredUP.Consts.Color.YELLOW);
 

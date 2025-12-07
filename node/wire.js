@@ -18,22 +18,22 @@ TwoWayMap.prototype.revGet = function(key){ return this.reverseMap[key]; };
 
 var itemMap = new TwoWayMap({
    'NIX01' : '0',
-   'HOUSE2' : '1',
+   'HOUSEXX' : '1',
    'HOUSE' : '2',
    'MONSTEREYES' : '3',
-   'FIRETRUCK' : '4',
-   'DRAGON' : '5',
-   'TRACK' : '6',
-   'CAVE' : '7',
+   'CAVE' : '4',
+   'FIRETRUCK' : '5',
+   'TRACKX' : '6',
+   'CAVEX' : '7',
    'SIGNAL3' : '8',
    'SIGNAL3R' : '9',
    'SIGNAL2' : '10',
    'SIGNAL2R' : '11',
    'SIGNAL1' : '12',
-   'SIGNAL1R' : '13',
-   'WHITE1' : '14',
+   'GHOSTBUSTERS' : '13',
+   'TRACK' : '14',
    'HOUSE2' : '15',
-   'GHOSTBUSTERS' : '16'
+   'NO123' : '16'
 });
 
 var itemMap2 = new TwoWayMap({
@@ -59,7 +59,7 @@ var itemMap2 = new TwoWayMap({
 var status = {
    'MONSTER' : 0,
    'CAVE' : 0,
-   'FIRE' : 0,
+   'FIRETRUCK' : 0,
    'DRAGON' : 0,
    'LIGHTHOUSE' : 0,
    'SIGNAL1' : 0,
@@ -88,7 +88,7 @@ var modes = {
    'MONSTER' : 5,
    'CAVE' : 5,
    'DRAGON' : 5,
-   'FIRE' : 7,
+   'FIRETRUCK' : 7,
    'GHOSTBUSTERS' : 7,
    'WARNR' : 6,
    'LIGHTHOUSE' : 5,
@@ -128,8 +128,8 @@ const I2C_TRAIN_ADDR = 0x0e;
 const TRAIN_STARTFORWARD = 11;
 const TRAIN_FORWARD = 10;
 const TRAIN_BACKWARD = 20;
-const CROSSING_UP = 21;
-const CROSSING_DOWN = 22;
+const CROSSING_UP = 121;
+const CROSSING_DOWN = 122;
 const TRAIN_SETSPEED_LOW = 30;
 const TRAIN_SETSPEED_HIGH = 50;
 const TRAIN_SETSPEED_DIFF = TRAIN_SETSPEED_HIGH-TRAIN_SETSPEED_LOW;
@@ -302,16 +302,16 @@ function receiveMsg(message) {
     if (cmd[1] === "CROSSING" && cmd[0] == "toggle") {
       if (status["CROSSING"] == "OFF") {
         trainMode = CROSSING_DOWN;
-        trainValue = 253;
+        trainValue = 255;
         trainDuration = 70;
         status["CROSSING"] = "ON";
-        sendI2C(I2C_TRAIN_ADDR, trainMode, 4, trainDuration, trainValue);
+        sendI2C(I2C_TRAIN_ADDR, trainMode, 2, trainDuration, trainValue);
       } else {
         trainMode = CROSSING_UP;
-        trainValue = 253;
+        trainValue = 255;
         trainDuration = 70;
         status["CROSSING"] = "OFF";
-        sendI2C(I2C_TRAIN_ADDR, trainMode, 4, trainDuration, trainValue);
+        sendI2C(I2C_TRAIN_ADDR, trainMode, 2, trainDuration, trainValue);
       }
     }
 

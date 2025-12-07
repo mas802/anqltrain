@@ -109,6 +109,11 @@ public class TriggerService {
         registerTrigger("THEFORCE:ON",  "toggle:UNLOADER");
         registerTrigger("THEFORCE:OFF", "toggle:UNLOADER");
 
+        registerTrigger("HOUSE1:ON",  "set:STRIP2:on");
+        registerTrigger("HOUSE1:OFF", "set:STRIP2:off");
+
+        registerTrigger("DISCO:ON",  "set:STRIP1:rainbow", "set:STRIP2:rainbow");
+        registerTrigger("DISCO:OFF", "set:STRIP1:rainbow", "set:STRIP2:rainbow");
 
         System.out.println("Initialized " + triggers.size() + " triggers");
     }

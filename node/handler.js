@@ -265,7 +265,18 @@ let colorAtYard = "NONE";
 let colorAtLoader = "NONE";
 
 let trainLocation = STATIONS.FRONT;
-let path = STATIONS.YARD;
+let path = STATIONS.LOADER;
+let pathback = STATIONS.LOADER;
+
+function planCode() {
+  const locationChar = (trainLocation && trainLocation.length ? trainLocation[0] : 'G').toUpperCase();
+  const lengthChar = String(compositionAttached.length);
+  let loaderChar = colorAtLoader && colorAtLoader !== "NONE" ? colorAtLoader[0] : "";
+  if (!loaderChar && compositionAttached.length) {
+    loaderChar = compositionAttached[compositionAttached.length - 1];
+  }
+  return locationChar + lengthChar + (loaderChar ? loaderChar.toUpperCase() : 'G');
+}
 
 function handleDecouplerAction(splitLength, decoupler) {
   let trainLength = compositionAttached.length;
@@ -292,27 +303,36 @@ function handleDecouplerAction(splitLength, decoupler) {
   return detached;
 }
 
-/* TODO
-function ensurePath(path) {
-  switch (path) {
+function handleUpdatePath(pathtoset) {
+  ensureFront() 
+  switch (pathtoset) {
     case STATIONS.UNLOADER:
-     sendOrQueueSafe(["relay:set:SWITCHFRONT:ON"], SHORT_WAIT);
+     sendOrQueueSafe(["relay:set:SWITCHFRONT:OFF"], SHORT_WAIT);
      break;
     case STATIONS.LOADER:
-     sendOrQueueSafe(["relay:set:SWITCHFRONT:ON", "relay:set:SWITCHBACK:OFF"], SHORT_WAIT);
+     sendOrQueueSafe(["relay:set:SWITCHBACK:ON", "relay:set:SWITCHFRONT:ON"], SHORT_WAIT);
+     pathback = pathtoset;
      break;
     case STATIONS.YARD:
-     sendOrQueueSafe(["relay:set:SWITCHFRONT:OFF", "relay:set:SWITCHBACK:OFF"], SHORT_WAIT);
+     sendOrQueueSafe(["relay:set:SWITCHBACK:OFF", "relay:set:SWITCHFRONT:ON"], SHORT_WAIT);
+     pathback = pathtoset;
      break;
     default:
-      console.log("ERROR: illegal path value " + path);
+      console.log("ERROR: illegal path value " + pathtoset);
   }
+  path = pathtoset;
 }
-*/
 
 function ensureFront() {
   if (trainLocation != STATIONS.FRONT) {
-    sendOrQueueSafe([trainRelay(10,100,BOOST_WAIT)], BOOST_WAIT);
+    sendOrQueueSafe([trainRelay(10,10,BOOST_WAIT)], BOOST_WAIT);
+    sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
+  }
+}
+
+function ensureFrontSlow() {
+  if (trainLocation != STATIONS.FRONT) {
+    sendOrQueueSafe([trainRelay(10,10,BOOST_WAIT)], BOOST_WAIT);
     sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
   }
 }
@@ -366,11 +386,13 @@ function receiveMsg(message) {
 
   if (queue.length > 1 && queue.length < 10) {
 
-    // CONSIDER: maybe have a queu prefix and resolve first
+    // CONSIDER: maybe have a queue prefix and resolve first
+    // TODO this should be a list of queueMeCommands
     if ((message === "toggle:BLUE" || message === "toggle:TRAIN" || message === "toggle:FRONT") ||
       (message === "toggle:ORANGE" || message === "toggle:UNLOADER") ||
       (message === "toggle:RED" || message === "toggle:YARD" )||
-      (message === "toggle:GREEN" || message === "toggle:LOADER" || message === "toggle:LOADEE")) {
+      (message === "toggle:GREEN" || message === "toggle:LOADER" || message === "toggle:LOADEE" ||
+      message === "toggle:PATHBACK" || message === "toggle:PATHFRONT")) {
       sendOrQueueSafe([`relay:${message}`], QUEUE_WAIT);
     }
 
@@ -392,52 +414,74 @@ function receiveMsg(message) {
 
     if (message === "toggle:ORANGE" || message === "toggle:UNLOADER") {
       if (trainLocation === STATIONS.UNLOADER) {
-        ensureFront();
+        ensureFrontSlow();
         trainLocation = STATIONS.FRONT;
       } else {
-        ensureFront();
-        sendOrQueueSafe(["relay:set:SWITCHBACK:OFF"], CROSSING_WAIT);
+        handleUpdatePath(STATIONS.UNLOADER);
         sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:UNLOADER`], CROSSING_WAIT);
         trainLocation = STATIONS.UNLOADER;
-        path = STATIONS.UNLOADER;
       }
     }
 
-    if (message === "toggle:RED" || message === "toggle:YARD" ) { // FRONT,YARD,DOUBLE
+    if (message === "toggle:RED" || message === "toggle:YARD" ) { 
  
       if (trainLocation === STATIONS.YARD) {
         compositionAt[STATIONS.YARD] = handleDecouplerAction(2, "DECOUPLERFRONT");
       } else {
-        ensureFront();
-        sendOrQueueSafe(["relay:set:SWITCHFRONT:OFF", "relay:set:SWITCHBACK:ON"], CROSSING_WAIT);
+        handleUpdatePath(STATIONS.YARD);
         sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:YARD`], CROSSING_WAIT);
         trainLocation = STATIONS.YARD;
-        path = STATIONS.YARD;
         compositionAttached.push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
       }
     }
 
-    if (message === "toggle:GREEN" || message === "toggle:LOADER") { // 
+    if (message === "toggle:GREEN" || message === "toggle:LOADER") { 
       if (trainLocation === STATIONS.LOADER) {
         compositionAt[STATIONS.LOADER] = handleDecouplerAction(1, "DECOUPLERBACK");
       } else {
-        ensureFront();
-        sendOrQueueSafe(["relay:set:SWITCHFRONT:ON", "relay:set:SWITCHBACK:ON"], CROSSING_WAIT);
+        handleUpdatePath(STATIONS.LOADER);
         sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
         sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
         trainLocation = STATIONS.LOADER;
-        path = STATIONS.LOADER;
         compositionAttached.push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
       }
     }
 
-    if (message === "toggle:LOADEE") { // TODO check COLOR
+    if (message === "toggle:LOADEE") {
+      if (colorAtLoader != "NONE") { 
+        // TODO track and check load status / 
+        // TODO maybe block for 20 seconds after load
         sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:20`], SHORT_WAIT);
         sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:-20`], SHORT_WAIT);
+      } else {
+        handleUpdatePath(STATIONS.LOADER);
+        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
+        trainLocation = STATIONS.LOADER;
+        compositionAttached.push(...compositionAt[trainLocation]);
+        compositionAt[trainLocation] = [];
+      } 
+    }
+
+    if (message === "toggle:PATHBACK") {
+      handleUpdatePath(pathback === STATIONS.YARD?STATIONS.LOADER:STATIONS.YARD)
+      trainLocation = STATIONS.FRONT;
+    }
+
+    if (message === "toggle:PATHFRONT") {
+      handleUpdatePath(path === STATIONS.UNLOADER?pathback:STATIONS.UNLOADER)
+      trainLocation = STATIONS.FRONT;
+    }
+
+    if (message === "toggle:CURVE") {
+      console.log("EMERGENCY STOP");
+      queue = [];
+      ensureFront();
+      trainLocation = STATIONS.FRONT;
     }
 
     if (message === "toggle:DEMO") { // 
@@ -450,7 +494,6 @@ function receiveMsg(message) {
         sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
         sendOrQueueSafe([`relay:toggle:FRONT`], QUEUE_WAIT);
     }
-
   }
 
   if (message === "info:BLUE" || message === "info:RED" || message === "info:GREEN" || message === "info:ORANGE") {
@@ -467,22 +510,23 @@ function receiveMsg(message) {
   }
 
   if (message.startsWith("info:PLAN")) {
-    const locationChar = (trainLocation && trainLocation.length ? trainLocation[0] : 'G').toUpperCase();
-    const lengthChar = String(compositionAttached.length);
-    let loaderChar = colorAtLoader && colorAtLoader !== "NONE" ? colorAtLoader[0] : "";
-    if (!loaderChar && compositionAttached.length) {
-      loaderChar = compositionAttached[compositionAttached.length - 1];
-    }
-    const planCode = locationChar + lengthChar + (loaderChar ? loaderChar.toUpperCase() : 'G');
-    sendMsg(["state:"+cmd[1]+":" + planCode]);
+    sendMsg(["state:"+cmd[1]+":" + planCode()]);
+  }
+
+  if (message.startsWith("info:PATHBACK")) {
+    sendMsg(["state:"+cmd[1]+":" + pathback]);
+  }
+
+  if (message.startsWith("info:PATHFRONT")) {
+    sendMsg(["state:"+cmd[1]+":" + (path === UNLOADER.YARD?STATIONS.UNLOADER:STATIONS.BACK)]);
   }
 
   if (message === "info:YARD") {
-    sendMsg(["state:YARD:COMP_" + compositionAt[STATIONS.YARD].join("")]);
+    sendMsg(["state:YARD:COMP_" + compositionAt[STATIONS.YARD].join("")]); // TODO planCode() or maybe just location
   }
 
   if (message === "info:LOADER") {
-    sendMsg(["state:LOADER:COMP_" + compositionAt[STATIONS.LOADER].join("")]);
+    sendMsg(["state:LOADER:COMP_" + compositionAt[STATIONS.LOADER].join("")]); // TODO planCode() or maybe just location
   }
 
   if (message === "info:ALLLIGHTS") {

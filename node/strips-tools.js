@@ -11,7 +11,7 @@ const {
 const { scanCommand, dumpCommand, connectionPool } = require('./strips-core');
 
 async function main() {
-  await refreshStrips();
+//  await refreshStrips();
   printHelp();
   const rl = readline.createInterface({
     input: process.stdin,

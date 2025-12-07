@@ -114,13 +114,13 @@ magick \( ${SRC_IMG_DIR}/PLAN.png \) \
   
   magick ${SRC_IMG_DIR}/PLAN_${1}_00.png -resize 300x ${IMG_DIR}/PLAN_LOADER_${1}.jpg
   magick ${SRC_IMG_DIR}/PLAN_${1}_01.png -resize 300x ${IMG_DIR}/PLAN_LOADEE_${1}.jpg
-  magick ${SRC_IMG_DIR}/PLAN_${1}_02.png -resize 300x ${IMG_DIR}/PLAN_DEMO_${1}.jpg
+#  magick ${SRC_IMG_DIR}/PLAN_${1}_02.png -resize 300x ${IMG_DIR}/PLAN_DEMO_${1}.jpg
   magick ${SRC_IMG_DIR}/PLAN_${1}_03.png -resize 300x ${IMG_DIR}/PLAN_YARD_${1}.jpg
-  magick ${SRC_IMG_DIR}/PLAN_${1}_04.png -resize 300x ${IMG_DIR}/PLAN_SWITCHBACK_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_04.png -resize 300x ${IMG_DIR}/PLAN_PATHBACK_${1}.jpg
   magick ${SRC_IMG_DIR}/PLAN_${1}_05.png -resize 300x ${IMG_DIR}/PLAN_UNLOADER_${1}.jpg
   magick ${SRC_IMG_DIR}/PLAN_${1}_06.png -resize 300x ${IMG_DIR}/PLAN_FRONT_${1}.jpg
-  magick ${SRC_IMG_DIR}/PLAN_${1}_07.png -resize 300x ${IMG_DIR}/PLAN_SWITCHFRONT_${1}.jpg
-  magick ${SRC_IMG_DIR}/PLAN_${1}_08.png -resize 300x ${IMG_DIR}/PLAN_CURVE_${1}.jpg
+  magick ${SRC_IMG_DIR}/PLAN_${1}_07.png -resize 300x ${IMG_DIR}/PLAN_PATHFRONT_${1}.jpg
+#  magick ${SRC_IMG_DIR}/PLAN_${1}_08.png -resize 300x ${IMG_DIR}/PLAN_CURVE_${1}.jpg
 }
 
 function plans () {
@@ -145,15 +145,20 @@ plan "Y3${i}" NONE NONE NONE NONE RED $2 $3 $1 NONE NONE NONE NONE NONE NONE NON
 
 plan "OFF" NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE
 plan "ON" RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE
+plan "PATHBACK_OFF" NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE
+plan "PATHBACK_ON" RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE
+plan "PATHFRONT_OFF" NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE NONE
+plan "PATHFRONT_ON" RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE RED WHITE YELLOW BLUE
+
 common_pics PLAN
 common_pics PLAN_LOADER
 common_pics PLAN_LOADEE
 common_pics PLAN_DEMO
 common_pics PLAN_YARD
-common_pics PLAN_SWITCHBACK
+common_pics PLAN_PATHBACK
 common_pics PLAN_UNLOADER
 common_pics PLAN_FRONT
-common_pics PLAN_SWITCHFRONT
+common_pics PLAN_PATHFRONT
 common_pics PLAN_CURVE
 
 plans GRAY GRAY GRAY
@@ -269,6 +274,14 @@ common_pics SWITCHFRONT
 magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCHBACK_ON.jpg
 magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SWITCHBACK_OFF.jpg
 common_pics SWITCHBACK
+
+magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/PATHFRONT_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/PATHFRONT_OFF.jpg
+common_pics PATHFRONT
+
+magick ${SRC_IMG_DIR}/IMG_9499.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/PATHBACK_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_9500.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/PATHBACK_OFF.jpg
+common_pics PATHBACK
 
 # magick ${SRC_IMG_DIR}/IMG_9509.jpg -resize 300x -crop 300x226+0+80 ${IMG_DIR}/DECOUPLER_ON.jpg
 # magick ${SRC_IMG_DIR}/IMG_9510.jpg -resize 300x -crop 300x226+6+80 ${IMG_DIR}/DECOUPLER_OFF.jpg

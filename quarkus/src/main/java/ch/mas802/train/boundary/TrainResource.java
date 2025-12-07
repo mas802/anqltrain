@@ -34,7 +34,7 @@ public class TrainResource {
 
     List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA", "WATER");
 
-    private static final long TOKEN_MAX_AGE_SECONDS = 10 * 60;
+    private static final long TOKEN_MAX_AGE_SECONDS = 30 * 60;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

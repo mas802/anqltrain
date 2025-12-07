@@ -271,11 +271,11 @@ async function ensureContinuousScan() {
     });
   };
   start();
-  noble.on('scanStop', () => {
-    if (noble.state === 'poweredOn') {
-      setTimeout(start, 200);
-    }
-  });
+  // noble.on('scanStop', () => {
+  //   if (noble.state === 'poweredOn') {
+  //     setTimeout(start, 200);
+  //   }
+  // });
 }
 
 async function waitForPoweredOn() {

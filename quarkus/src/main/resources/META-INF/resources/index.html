@@ -13,11 +13,7 @@
 <div class="wrapper">
   <div class="train box full"><xmas-start data-label="TRAIN"/></div>
   <div class="box full" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
-    <div id="countdown" style="font-size:3rem;line-height:1.2;margin:0.5em 0;">
-      <div id="countdown-hours">noch -- Stunden</div>
-      <div id="countdown-minutes">-- Minuten -- Sekunden</div>
-    </div>
-    <div style="opacity:0.8;">bis zum Apero am 07.12.2025, 18:00 Uhr</div>
+    <div style="opacity:0.8;">Apero Heute am 07.12.2025, 18:00 Uhr</div>
     <div style="opacity:0.8;">Marktgasse 42, Rheinfelden</div>
    <div style="opacity:0.8;"></div>
   </div>
@@ -30,7 +26,10 @@
 
 <div class="box forth1"><xmas-start data-label="MONSTER"></xmas-start></div>
       <div class="box forth2"><xmas-start data-label="ALLOFF"></xmas-start></div>
-  <div class="box forth3"><xmas-start data-label="PLAN"></xmas-start></div>
+<div class="box forth3">
+  <!-- TODO carry over key -->    
+  <a href="https://t.802.ch/train.html"><img width="200px" class="imgw" style="max-width: 100%;width: 1000px;display: block;position: relative;z-index: 1;cursor: pointer;" src="imgs/PLAN_ON.jpg" title="plan"/></a>
+</div>
 <div class="box forth4"><xmas-start data-label="WATER"></xmas-start></div>
 
 <div class="box forth1"><xmas-start data-label="HOUSE"></xmas-start></div>
@@ -73,38 +72,5 @@
 <audio id="AUDIO_FIRE" src="audio/martinshorn.mp3"></audio>
 <audio id="AUDIO_GHOSTBUSTERS" src="audio/ghostbuster-short2.mp3"></audio>
 
-
-
-  <script>
-  (function() {
-    const target = new Date('2025-12-07T18:00:00+02:00');
-    const elHours = document.getElementById('countdown-hours');
-    const elMinutes = document.getElementById('countdown-minutes');
-
-    function pad(n) { return n.toString().padStart(2, '0'); }
-
-    function tick() {
-      const now = new Date();
-      const diffMs = target.getTime() - now.getTime();
-      if (diffMs <= 0) {
-        elHours.textContent = 'noch 00 Stunden';
-        elMinutes.textContent = '00 Minuten 00 Sekunden';
-        clearInterval(timer);
-        return;
-      }
-      const totalSeconds = Math.floor(diffMs / 1000);
-      const days = Math.floor(totalSeconds / 86400);
-      const hours = Math.floor((totalSeconds % 86400) / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-      const prefix = days > 0 ? days + ' Tage ' : '';
-      elHours.textContent = 'noch ' + prefix + pad(hours) + ' Stunden';
-      elMinutes.textContent = pad(minutes) + ' Minuten ' + pad(seconds) + ' Sekunden';
-    }
-
-    tick();
-    const timer = setInterval(tick, 1000);
-  })();
-  </script>
 </body>
 </html>

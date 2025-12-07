@@ -24,6 +24,10 @@ const EFFECTS = {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 45, 80, buildMonsterPalette());
   },
+  warmwhite: async (controller, effectId = 7) => {
+    await controller.switchOn(true);
+    await controller.setEffect(effectId, 0, 45, 80, buildWarmWhitePalette());
+  },
   ghost: async (controller, effectId = 7) => {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 45, 80, buildGhostPalette());
@@ -40,7 +44,10 @@ const EFFECTS = {
   blue: createColorEffect([0, 0, 255]),
   red: createColorEffect([255, 0, 0]),
   yellow: createColorEffect([255, 120, 0]),
-  on: createColorEffect([255, 255, 255]),
+  on: async (controller, effectId = 7) => {
+    await controller.switchOn(true);
+    await controller.setEffect(effectId, 0, 45, 80, buildWarmWhitePalette());
+  },
   off: async (controller) => {
     await controller.switchOn(false);
   },
@@ -55,11 +62,11 @@ function createColorEffect([r, g, b]) {
 
 function buildFirePalette() {
   return buildColourDataPacket([
-    [45, 0, 0],
+    [250, 200, 100],
     [70, 0, 0],
     [95, 2, 0],
     [120, 5, 0],
-    [145, 12, 0],
+    [250, 160, 0],
     [165, 20, 0],
     [185, 32, 2],
     [198, 48, 6],
@@ -68,7 +75,7 @@ function buildFirePalette() {
 
 function buildMonsterPalette() {
   return buildColourDataPacket([
-    [0, 30, 0],
+    [160, 230, 160],
     [0, 60, 5],
     [5, 90, 20],
     [20, 130, 40],
@@ -79,9 +86,22 @@ function buildMonsterPalette() {
   ]);
 }
 
+function buildWarmWhitePalette() {
+  return buildColourDataPacket([
+    [255, 120, 10],
+    [255, 150, 40],
+    [255, 175, 70],
+    [255, 195, 105],
+    [255, 210, 140],
+    [255, 225, 175],
+    [255, 238, 210],
+    [255, 248, 235],
+  ]);
+}
+
 function buildGhostPalette() {
   return buildColourDataPacket([
-    [30, 0, 60],
+    [230, 0, 260],
     [60, 0, 120],
     [90, 0, 180],
     [130, 20, 220],
