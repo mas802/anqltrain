@@ -60,7 +60,7 @@ var status = {
    'MONSTER' : 0,
    'CAVE' : 0,
    'FIRETRUCK' : 0,
-   'DRAGON' : 0,
+   'DRAGON' : 0, 
    'LIGHTHOUSE' : 0,
    'SIGNAL1' : 0,
    'SIGNAL1R' : 0,
@@ -175,7 +175,7 @@ readI2C = function() {
     //     }
     //   }
     // console.debug(rbuffer2);
-    });
+    // });
 
   }
 }
