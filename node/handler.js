@@ -341,7 +341,7 @@ function ensureFrontSlow() {
 
 function trainRelay(mode, speeddelta, duration) {
 
-  if (trainFailed != "OFF") return;
+  if (trainFailed != "OFF") return "relay:set:TRAINFAILED:ON";
 
   let trainLength = compositionAttached.length;
   let trainsSpeed = BASE_SPEED + trainLength * PER_WAGON_SPEED + speeddelta;
