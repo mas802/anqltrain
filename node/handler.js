@@ -31,6 +31,8 @@ let watchdogTimer;
 let colorTimer;
 let queue = [];
 
+let trainFailed = "OFF";
+
 const afterColorTimeout = 1000;
 let colorRecorder = [];
 let colorRecorderTimer = null;
@@ -338,6 +340,9 @@ function ensureFrontSlow() {
 }
 
 function trainRelay(mode, speeddelta, duration) {
+
+  if (trainFailed != "OFF") return;
+
   let trainLength = compositionAttached.length;
   let trainsSpeed = BASE_SPEED + trainLength * PER_WAGON_SPEED + speeddelta;
   let trainDuration = duration/100;
@@ -382,6 +387,14 @@ function receiveMsg(message) {
 
   if (cmd[0] === "set" && cmd[1] === "TRAINLOC") {
     console.log(["TRAINLOC", cmd[2], trainLocation, path, compositionAttached, compositionAt, colorAtYard, colorAtLoader]);
+  }
+
+  if (cmd[1] === "TRAINFAILED") {
+    if (cmd[0] === "toggle") {
+      trainFailed = (trainFailed==="OFF")?"ON":"OFF"
+    } else if (cmd[0] === "set") {
+      trainFailed = cmd[2];
+    }
   }
 
   if (queue.length > 1 && queue.length < 7) {
@@ -502,7 +515,8 @@ function receiveMsg(message) {
   }
 
   if (message === "info:TRAIN") {
-    sendMsg(["state:TRAIN:ON"]);
+    let msg = (trainFailed != "OFF")?"failed":"ON";
+    sendMsg(["state:TRAIN:" + msg]);
   }
 
   if (message === "info:SANTA") {

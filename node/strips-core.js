@@ -247,6 +247,9 @@ const identifierIndex = new Map();
 let scannerInitialized = false;
 
 const rememberPeripheral = (peripheral) => {
+  if (!isTargetPeripheral(peripheral)) {
+    return;
+  }
   discoveredPeripherals.set(peripheral.id, peripheral);
   deviceIdentifiers(peripheral).forEach((id) => {
     if (id) {
