@@ -13,9 +13,6 @@ function TwoWayMap(map) {
 TwoWayMap.prototype.get = function(key){ return this.map[key]; };
 TwoWayMap.prototype.revGet = function(key){ return this.reverseMap[key]; };
 
-    let FORWARD_SPEED = 100;
-    let BACKWARD_SPEED = FORWARD_SPEED;
-
 var itemMap = new TwoWayMap({
    'DONOTUSE0' : '0',
    'DONOTUSE1' : '1',
@@ -125,17 +122,10 @@ var statusMap = new TwoWayMap( {
 });
 
 const I2C_TRAIN_ADDR = 0x0e;
-const TRAIN_STARTFORWARD = 11;
-const TRAIN_FORWARD = 10;
-const TRAIN_BACKWARD = 20;
 const CROSSING_UP = 121;
 const CROSSING_DOWN = 122;
-const TRAIN_SETSPEED_LOW = 30;
-const TRAIN_SETSPEED_HIGH = 50;
-const TRAIN_SETSPEED_DIFF = TRAIN_SETSPEED_HIGH-TRAIN_SETSPEED_LOW;
-const TRAIN_STOP = 99;
 
-let trainMode = TRAIN_STOP;
+let trainMode = null;
 
 //
 // BOUNDARY I2C
@@ -253,7 +243,7 @@ function receiveMsg(message) {
 
   if (status[itemName] != undefined) {
 
-    console.log("Received WIRE relevant meaasge: '" + message + "'");
+    console.log("Received WIRE relevant message: '" + message + "'");
     // console.debug(["item nos", cmd[0], itemName, m11, m12, m21, m22, item1Num, item2Num, modus]);
 
     m11 = itemMap.get(itemName);
@@ -263,41 +253,6 @@ function receiveMsg(message) {
 
     let item1Num = m11 ? +m11 : ( m12 ? +m12 : 99)
     let item2Num = m21 ? +m21 : ( m22 ? +m22 : 99)
-
-    trainValue = 0;
-    trainDuration = 200;
-    let modus = modes[itemName];
-    if (cmd[1] === "TRAINDEPRECATED" && cmd[0] == "set") {
-      if (cmd[2] === 'fastforward') {
-        trainMode = TRAIN_FORWARD;
-        trainValue = FORWARD_SPEED;
-      } else if (cmd[2] === 'startforward') {
-        trainMode = TRAIN_FORWARD;
-        trainValue = FORWARD_SPEED;
-      } else if (cmd[2] === 'forward') {
-        trainMode = TRAIN_FORWARD;
-        trainValue = FORWARD_SPEED;
-      } else if (cmd[2] === 'slowforward') {
-        trainMode = TRAIN_FORWARD;
-        trainValue = FORWARD_SPEED;
-      } else if (cmd[2] === 'backward') {
-        trainMode = TRAIN_BACKWARD;
-        trainValue = BACKWARD_SPEED;
-      } else if (cmd[2] === 'crossingupx') {
-        trainMode = CROSSING_UP;
-        trainValue = 253;
-        trainDuration = 70;
-        status["CROSSING"] = "OFF";
-      } else if (cmd[2] === 'crossingdownx') {
-        trainMode = CROSSING_DOWN;
-        trainValue = 253;
-        trainDuration = 70;
-        status["CROSSING"] = "ON";
-      } else if (cmd[2] === 'stop') {
-        trainMode = TRAIN_STOP;
-      }
-      sendI2C(I2C_TRAIN_ADDR, trainMode, 3, trainDuration, trainValue);
-    }
 
     if (cmd[1] === "CROSSING" && cmd[0] == "toggle") {
       if (status["CROSSING"] == "OFF") {
@@ -348,7 +303,7 @@ function receiveMsg(message) {
 // CONTROL
 
 statusSync = function(forceall, forceditem) {
-  if (forceditem === "TRAINDEPRECATED" || forceditem === "CROSSING") {
+  if (forceditem === "CROSSING") {
     sendMsg("state:"+forceditem+":"+status[forceditem]);
   } else {
 

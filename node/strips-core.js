@@ -58,7 +58,7 @@ class LightController {
     if (this.notificationChar) {
       await subscribeCharacteristic(this.notificationChar, (data) => {
         const plaintext = decryptAesEcb(data);
-        console.log(`Notification: ${toHex(plaintext)}`);
+        // ignore for now console.log(`Notification: ${toHex(plaintext)}`);
       });
     }
   }
