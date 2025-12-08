@@ -254,6 +254,8 @@ function receiveMsg(message) {
     let item1Num = m11 ? +m11 : ( m12 ? +m12 : 99)
     let item2Num = m21 ? +m21 : ( m22 ? +m22 : 99)
 
+    let modus = modes[itemName];
+
     if (cmd[1] === "CROSSING" && cmd[0] == "toggle") {
       if (status["CROSSING"] == "OFF") {
         trainMode = CROSSING_DOWN;

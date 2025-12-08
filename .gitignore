@@ -44,3 +44,5 @@ Library/Caches/
 .vscode/settings.json
 archive/
 sh/install.sh
+doc/ARCH.txt
+sh/pic.sh

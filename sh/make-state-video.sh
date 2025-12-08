@@ -6,7 +6,7 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-IMG_DIR="../quarkus/src/main/resources/META-INF/resources/imgs"
+IMG_DIR="../pics/src"
 OUT_DIR="../quarkus/src/main/resources/META-INF/resources/videos"
 AUDIO_DIR="../quarkus/src/main/resources/META-INF/resources/audio"
 mkdir -p "$OUT_DIR"
