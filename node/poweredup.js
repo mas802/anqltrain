@@ -8,7 +8,25 @@ let config = JSON.parse(fs.readFileSync('/home/train/anqltrain/node/config.json'
 
 const PoweredUP = require("node-poweredup");
 const poweredUP = new PoweredUP.PoweredUP();
-poweredUP.scan(); // Start scanning
+let scanStopTimer = null;
+let isScanning = false;
+
+function scanWithStop(timeoutMs = 60000) {
+  if (isScanning) {
+    return;
+  }
+  isScanning = true;
+  poweredUP.scan();
+  if (scanStopTimer) {
+    clearTimeout(scanStopTimer);
+  }
+  scanStopTimer = setTimeout(() => {
+    poweredUP.stop();
+    isScanning = false;
+    scanStopTimer = null;
+  }, timeoutMs);
+}
+scanWithStop();
 
 console.log("POWEREDUP Looking for train and remote...");
 
@@ -59,9 +77,6 @@ function releaseHubId(hubId) {
   if (!hubId) return;
   activeHubs.delete(hubId);
 }
-
-// Remote configurations now loaded from config.json
-let hubConfigs = config.remoteConfigs;
 
 let motorConfig = {
 "SWITCHFRONT" : {
@@ -131,10 +146,10 @@ poweredUP.on("discover", async (hub) => {
       return;
     }
     markHubConnected(hubId);
-    console.log(["POWEREDUP INFO connect ", hub.primaryMACAddress, hub.type]);
+    console.log(["POWEREDUP INFO connect ", hubId, hub.primaryMACAddress, hub.uuid, hub.type]);
     hub.on("disconnect", () => {
       releaseHub();
-      console.log("disconnect hub " + (hub.primaryMACAddress || hub.uuid || hub.type));
+      console.log("disconnect hub " + hubId + " - " + hub.primaryMACAddress + " - " + hub.uuid + " - " + hub.type);
     });
 
     let hubname = null
@@ -153,64 +168,33 @@ poweredUP.on("discover", async (hub) => {
 
     } else if (hub.type === PoweredUP.Consts.HubType.REMOTE_CONTROL) {
 
-        if (hub.primaryMACAddress === config["hubAddr"]["remote1"] ) {
-          remoteHub = hub;
-          const led = await remoteHub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
+      if (hubname != null) {
 
-          remoteButtonLeft = await remoteHub.waitForDeviceAtPort("LEFT");
-          remoteButtonRight = await remoteHub.waitForDeviceAtPort("RIGHT");
-          led.setColor(PoweredUP.Consts.Color.PURPLE);
+        const led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
+        led.setColor(PoweredUP.Consts.Color.RED);
 
-          addr = "remote1";
+        const buttonLeft = await hub.waitForDeviceAtPort("LEFT");
+        buttonLeft.on("remoteButton", ({ event }) => {
+          buttonHandler(hub, hubname+":LEFT", event);
+        });
 
-          remoteButtonLeft.on("remoteButton", ({ event }) => {
-                if (event === PoweredUP.Consts.ButtonState.UP) {
-                  sendMsg(hubConfigs[addr]["LEFT"]["UP"]);
-                } else if (event === PoweredUP.Consts.ButtonState.STOP) {
-                  sendMsg(hubConfigs[addr]["LEFT"]["STOP"]);
-                } else if (event === PoweredUP.Consts.ButtonState.DOWN) {
-                  sendMsg(hubConfigs[addr]["LEFT"]["DOWN"]);
-                }
-          });
+        const buttonRight = await hub.waitForDeviceAtPort("RIGHT");
+        buttonRight.on("remoteButton", ({ event }) => {
+          buttonHandler(hub, hubname+":RIGHT", event);
+        });
 
-          remoteButtonRight.on("remoteButton", ({ event }) => {
-                if (event === PoweredUP.Consts.ButtonState.UP) {
-                  sendMsg(hubConfigs[addr]["RIGHT"]["UP"]);
-                } else if (event === PoweredUP.Consts.ButtonState.STOP) {
-                  sendMsg(hubConfigs[addr]["RIGHT"]["STOP"]);
-                } else if (event === PoweredUP.Consts.ButtonState.DOWN) {
-                  sendMsg(hubConfigs[addr]["RIGHT"]["DOWN"]);
-                }
-          });
-          console.log(`INFO: Connected to remote (${remoteHub.name})!`);
+        hub.on("button", (device) => {
+          buttonHandler(device, hubname, PoweredUP.Consts.ButtonState.PRESSED);
+        });
 
-        } else if (hubname != null) {
+        console.log(`INFO: Connected to ${hubname} (${hub.name})!`);
 
-          const led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
-          led.setColor(PoweredUP.Consts.Color.RED);
+      } else {
 
-          const buttonLeft = await hub.waitForDeviceAtPort("LEFT");
-          buttonLeft.on("remoteButton", ({ event }) => {
-            buttonHandler(hub, hubname+":LEFT", event);
-          });
+        console.log("UNKONW remote " + hub.primaryMACAddress);
+        hub.disconnect();
 
-          const buttonRight = await hub.waitForDeviceAtPort("RIGHT");
-          buttonRight.on("remoteButton", ({ event }) => {
-            buttonHandler(hub, hubname+":RIGHT", event);
-          });
-
-          hub.on("button", (device) => {
-            buttonHandler(device, hubname, PoweredUP.Consts.ButtonState.PRESSED);
-          });
-
-          console.log(`INFO: Connected to ${hubname} (${hub.name})!`);
-
-        } else {
-
-          console.log("UNKONW remote " + hub.primaryMACAddress);
-          hub.disconnect();
-
-        }
+      }
 
     } else if (hub.type === PoweredUP.Consts.HubType.MOVE_HUB) {
 
@@ -226,10 +210,9 @@ poweredUP.on("discover", async (hub) => {
       if (hub.primaryMACAddress == config["hubAddr"]["CONVEYORHUB"]) {
         console.log(`INFO: Connected to CONVEYORHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
-        led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
-        led.setColor(PoweredUP.Consts.Color.YELLOW);
+        hubled.setColor(PoweredUP.Consts.Color.YELLOW);
 
-        sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
+        let sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
         sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
         hub.on("button", (device) => {
@@ -241,59 +224,44 @@ poweredUP.on("discover", async (hub) => {
         });
 
       } else if (hub.primaryMACAddress == config["hubAddr"]["SWITCHHUB"]) {
+        console.log(`INFO: Connected to SWITCHHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
-          console.log(`INFO: Connected to SWITCHHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
+        hubled.setColor(PoweredUP.Consts.Color.GREEN);
 
-          motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("C");
+        motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("C");
+        motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("A");
 
-          motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("A");
-          motorConfig["SWITCHBACK"].led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
-          motorConfig["SWITCHBACK"].led.setColor(PoweredUP.Consts.Color.YELLOW);
+        let sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
+        sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
-          hub.on("button", (device) => {
-            buttonHandler(device, "SWITCHFRONT", PoweredUP.Consts.ButtonState.PRESSED);
-          });
+        hub.on("button", (device) => {
+          buttonHandler(device, "SWITCHFRONT", PoweredUP.Consts.ButtonState.PRESSED);
+        });
 
-          sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
-          sensor.setColor(PoweredUP.Consts.Color.WHITE);
-
-          hub.on("colorAndDistance", (device, { color, distance }) => {
-            colorSensorHandler(device, color, distance, "SWITCH");
-          });
+        hub.on("colorAndDistance", (device, { color, distance }) => {
+          colorSensorHandler(device, color, distance, "SWITCH");
+        });
 
       } else if (hub.primaryMACAddress == config["hubAddr"]["DECOUPLERHUB"]) {
-          console.log(`INFO: Connected to DECOUPLERHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
+        console.log(`INFO: Connected to DECOUPLERHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
-          motorConfig["DECOUPLERFRONT"].motor = await hub.waitForDeviceAtPort("A");
+        hubled.setColor(PoweredUP.Consts.Color.BLUE);
 
-          motorConfig["DECOUPLERBACK"].led = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
-          motorConfig["DECOUPLERBACK"].led.setColor(PoweredUP.Consts.Color.BLUE);
-          motorConfig["DECOUPLERBACK"].motor = await hub.waitForDeviceAtPort("B");
+        motorConfig["DECOUPLERFRONT"].motor = await hub.waitForDeviceAtPort("A");
 
-          hub.on("button", (device) => {
-            buttonHandler(device, "DECOUPLER", PoweredUP.Consts.ButtonState.PRESSED);
-          });
+        motorConfig["DECOUPLERBACK"].motor = await hub.waitForDeviceAtPort("B");
 
-          sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
-          sensor.setColor(PoweredUP.Consts.Color.WHITE);
+        hub.on("button", (device) => {
+          buttonHandler(device, "DECOUPLER", PoweredUP.Consts.ButtonState.PRESSED);
+        });
 
-          hub.on("colorAndDistance", (device, { color, distance }) => {
-            colorSensorHandler(device, color, distance, "DECOUPLER");
-          });
+        sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
+        sensor.setColor(PoweredUP.Consts.Color.WHITE);
 
-/*
-          hub.on("colorAndDistance", (device, { color, distance}) => {
-            console.log("detected movement with distance: "+distance);
-            colorSensorHandler(device, color, "DECOUPLER");
-          });
-
-          hub.on("distance", (device, { distance}) => {
-            console.log("detected movement with distand: "+distance);
-            colorSensorHandler(device, PoweredUP.Consts.Color.BLUE, "DECOUPLER");
-          });
-*/
-        }
-
+        hub.on("colorAndDistance", (device, { color, distance }) => {
+          colorSensorHandler(device, color, distance, "DECOUPLER");
+        });
+      }
 
     } else {
           console.log("UNKONW hub " + hub.primaryMACAddress);
@@ -306,8 +274,21 @@ poweredUP.on("discover", async (hub) => {
 // PoweredUp Actions
 //
 
+function isMotorConnected(mconfig) {
+  if (!mconfig.motor) {
+    console.log("WARN: motor missing");
+    return false;
+  }
+  if (!mconfig.motor.connected) {
+    console.log("WARN: motor disconnected");
+    mconfig.motor = null;
+    return false;
+  }
+  return true;
+}
+
 async function setMotor(mconfig, goal) {
-  if (!mconfig.motor) { console.log("WARN: motor missing"); return; }
+  if (!isMotorConnected(mconfig)) return;
   let dir = mconfig.speed;
   if (goal === "OFF" && mconfig.mode == "toggle") dir = -dir;
   mconfig.state = goal;
@@ -322,7 +303,7 @@ async function toggleMotor(mconfig) {
 }
 
 async function runMotor(mconfig, degrees, speed) {
-  if (!mconfig.motor) { console.log("WARN: motor missing"); return; }
+  if (!isMotorConnected(mconfig)) return;
   console.log("direct set motor to: " + [degrees, speed])
   return await mconfig.motor.rotateByDegrees(degrees, speed)
       .catch(e => {console.warn([e, new Date().toISOString() + " motor to far", mconfig])});
@@ -352,6 +333,10 @@ var client = new W3CWebSocket('ws://localhost:8080/trainws/poweredup');
 
 function receiveMsg(message) {
   cmd = message.split(":");
+
+  if (message === "toggle:SCAN") {
+    scanWithStop();
+  }
 
   if (cmd[0] === "set" && cmd[1] === "PUMDIRECT") {
     let dmconfig = motorConfig[cmd[2]]

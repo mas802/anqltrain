@@ -195,20 +195,16 @@ magick "${SRC_IMG_DIR}/IMG_0851.jpeg" -resize 300x -crop 300x226+0+80 ${IMG_DIR}
 magick ${IMG_DIR}/SANTA_ON.jpg -modulate 100,50 ${IMG_DIR}/SANTA_OFF.jpg
 common_pics SANTA
 
-# magick "${SRC_IMG_DIR}/xmas2023_ - 8.jpeg" -resize 300x -crop 300x226+0+20 ${IMG_DIR}/TRACK_ON.jpg
-# magick "${SRC_IMG_DIR}/xmas2023_ - 7.jpeg" -resize 300x -crop 300x226+0+20 -modulate 100,50 ${IMG_DIR}/TRACK_OFF.jpg
-# common_pics TRACK
-
-magick ${SRC_IMG_DIR}/IMG_1018.jpg -resize 300x -crop 300x226+0+20 ${IMG_DIR}/TRACK_ON.jpg
-magick ${SRC_IMG_DIR}/IMG_1018.jpg -resize 300x -crop 300x226+0+20 -modulate 100,50 ${IMG_DIR}/TRACK_OFF.jpg
+magick ${SRC_IMG_DIR}/IMG_0879.jpeg -resize 600x -crop 300x226+300+220 ${IMG_DIR}/TRACK_ON.jpg
+magick ${SRC_IMG_DIR}/IMG_0880.jpeg -resize 600x -crop 300x226+300+220 ${IMG_DIR}/TRACK_OFF.jpg
 common_pics TRACK
 
-magick "${SRC_IMG_DIR}/xmas2023_ - 10.jpeg" -resize 300x  ${IMG_DIR}/HOUSE1_ON.jpg
-magick "${SRC_IMG_DIR}/xmas2023_ - 9.jpeg" -resize 300x  ${IMG_DIR}/HOUSE1_OFF.jpg
+magick "${SRC_IMG_DIR}/IMG_0860.jpeg" -resize 300x  -crop 300x226+0+60 ${IMG_DIR}/HOUSE1_ON.jpg
+magick "${SRC_IMG_DIR}/IMG_0859.jpeg" -resize 300x  -crop 300x226+0+60 ${IMG_DIR}/HOUSE1_OFF.jpg
 common_pics HOUSE1
 
-magick "${SRC_IMG_DIR}/xmas2023_ - 13.jpeg" -resize 300x  ${IMG_DIR}/HOUSE2_ON.jpg
-magick "${SRC_IMG_DIR}/xmas2023_ - 14.jpeg" -resize 300x  ${IMG_DIR}/HOUSE2_OFF.jpg
+magick "${SRC_IMG_DIR}/IMG_0884.jpeg" -resize 300x  -crop 300x226+0+120 ${IMG_DIR}/HOUSE2_ON.jpg
+magick "${SRC_IMG_DIR}/IMG_0883.jpeg" -resize 300x  -crop 300x226+0+120 ${IMG_DIR}/HOUSE2_OFF.jpg
 common_pics HOUSE2
 
 magick "${SRC_IMG_DIR}/IMG_6968.jpeg" -resize 300x  -crop 300x226+0+140  ${IMG_DIR}/FIRE_ON.jpg

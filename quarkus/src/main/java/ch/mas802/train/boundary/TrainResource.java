@@ -28,7 +28,7 @@ public class TrainResource {
     @Inject
     TriggerService triggerService;
 
-    List<String> alwaysOnList = List.of("NONE", "GUGGE", "SANTA");
+    List<String> alwaysOnList = List.of("NONE", "GUGGE");
 
     private static final long TOKEN_MAX_AGE_SECONDS = 30 * 60;
 
@@ -124,7 +124,7 @@ public class TrainResource {
     private Status youtubeStatus(String key) {
         AdventEntry event = triggerService.getAdventGrid().get(key);
         return new Status("YOUTUBE", 10000, 10000, 
-            (event != null && event.data() != null) ? event.data() : "VMuNEjnc3yk");
+            (event != null && event.data() != null) ? event.data() : "05mHbaKsyiA");
     }
 
     private long epochFromTokenOrNow(String token) {

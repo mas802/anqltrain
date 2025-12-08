@@ -384,7 +384,7 @@ function receiveMsg(message) {
     console.log(["TRAINLOC", cmd[2], trainLocation, path, compositionAttached, compositionAt, colorAtYard, colorAtLoader]);
   }
 
-  if (queue.length > 1 && queue.length < 10) {
+  if (queue.length > 1 && queue.length < 7) {
 
     // CONSIDER: maybe have a queue prefix and resolve first
     // TODO this should be a list of queueMeCommands
@@ -505,6 +505,10 @@ function receiveMsg(message) {
     sendMsg(["state:TRAIN:ON"]);
   }
 
+  if (message === "info:SANTA") {
+    sendMsg(["state:SANTA:ON"]);
+  }
+
   if (message === "info:TRAINCOMP") {
     sendMsg(["state:TRAINCOMP:COMP_" + compositionAttached.join("")]);
   }
@@ -519,6 +523,10 @@ function receiveMsg(message) {
 
   if (message.startsWith("info:PATHFRONT")) {
     sendMsg(["state:"+cmd[1]+":" + (path === UNLOADER.YARD?STATIONS.UNLOADER:STATIONS.BACK)]);
+  }
+
+  if (message.startsWith("info:LOADEE")) {
+    sendMsg(["state:"+cmd[1]+":" + (colorAtLoader != "NONE"?"ON":"OFF")]);
   }
 
   if (message === "info:YARD") {

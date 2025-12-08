@@ -68,5 +68,38 @@
 <audio id="AUDIO_FIRE" src="audio/martinshorn.mp3"></audio>
 <audio id="AUDIO_GHOSTBUSTERS" src="audio/ghostbuster-short2.mp3"></audio>
 
+  <script>
+const AUDIO_PREFIX = 'AUDIO_';
+
+const componentByLabel = new Map();
+document.querySelectorAll('xmas-start[data-label]').forEach(component => {
+    const label = component.getAttribute('data-label');
+    if (!label) {
+        return;
+    }
+    const normalized = label.trim().toUpperCase();
+    if (!componentByLabel.has(normalized)) {
+        componentByLabel.set(normalized, []);
+    }
+    componentByLabel.get(normalized).push(component);
+});
+
+document.querySelectorAll(`audio[id^="${AUDIO_PREFIX}"]`).forEach(audio => {
+    const id = audio.id || '';
+    const label = id.substring(AUDIO_PREFIX.length).toUpperCase();
+    const targets = componentByLabel.get(label);
+    if (!targets || targets.length === 0) {
+        return;
+    }
+    targets.forEach(target => {
+      console.log("add AUDIO for: " +label);
+        target.addEventListener('click', () => {
+            audio.currentTime = 0;
+            audio.play();
+        });
+    });
+});
+  </script>
+
 </body>
 </html>
