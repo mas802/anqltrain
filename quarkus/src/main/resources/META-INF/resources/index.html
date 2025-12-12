@@ -23,8 +23,7 @@
 <div class="box forth1"><xmas-start data-label="MONSTER"></xmas-start></div>
       <div class="box forth2"><xmas-start data-label="ALLOFF"></xmas-start></div>
 <div class="box forth3">
-  <!-- TODO carry over key -->    
-  <a href="https://t.802.ch/train.html"><img width="200px" class="imgw" style="max-width: 100%;width: 1000px;display: block;position: relative;z-index: 1;cursor: pointer;" src="imgs/PLAN_ON.jpg" title="plan"/></a>
+  <a id="plan-link" href="https://train.802.ch/train.html"><img width="200px" class="imgw" style="max-width: 100%;width: 1000px;display: block;position: relative;z-index: 1;cursor: pointer;" src="imgs/PLAN_ON.jpg" title="plan"/></a>
 </div>
 <div class="box forth4"><xmas-start data-label="WATER"></xmas-start></div>
 
@@ -44,7 +43,7 @@
       <div class="box forth4"><xmas-start data-label="DRAGON"></xmas-start></div>
 
       <div class="box forth1"><xmas-start data-label="SWITCHBACK"></xmas-start></div>
-      <div class="box forth2"><xmas-start data-label="SIGNAL2"></xmas-start></div>
+      <div class="box forth2"><xmas-start data-label="SWAP"></xmas-start></div>
     <div class="box forth3"><xmas-start data-label="FIRE"></xmas-start></div>
       <div class="box forth4"><xmas-start data-label="ALLON"></xmas-start></div>
 
@@ -99,6 +98,23 @@ document.querySelectorAll(`audio[id^="${AUDIO_PREFIX}"]`).forEach(audio => {
         });
     });
 });
+  </script>
+
+  <script>
+    (() => {
+      const link = document.getElementById('plan-link');
+      if (!link) {
+        return;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (!token) {
+        return;
+      }
+      const target = new URL(link.href);
+      target.searchParams.set('token', token);
+      link.href = target.toString();
+    })();
   </script>
 
 </body>

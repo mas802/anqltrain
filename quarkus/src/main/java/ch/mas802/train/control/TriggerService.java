@@ -130,8 +130,8 @@ public class TriggerService {
     
         addAdventEntry("TRACK", 8, "TRACK", "https://www.youtube.com/shorts/GMEniMG16bk");
         addAdventEntry("HOUSE1", 9, "HOUSE1", "https://www.youtube.com/shorts/1Pk2WoBNbSA");
-        addAdventEntry("CAVE", 10, "CAVE");
-            addAdventEntry("SIGNAL2", 11, "SIGNAL2"); // PATHBACK
+        addAdventEntry("SWAP", 10, "SWAP", "https://www.youtube.com/watch?v=5JWH4Ad17Z8");
+        addAdventEntry("HOUSE2", 11, "HOUSE2", "https://www.youtube.com/shorts/73ISAS7pEqE");
         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS"); // ?
             addAdventEntry("GHOSTBUSTERS", 13, "GHOSTBUSTERS");
                 addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK"); // LOADER
@@ -142,7 +142,7 @@ public class TriggerService {
             addAdventEntry("GUGGE", 19, "GUGGE");
             addAdventEntry("ALLOFF", 20, "ALLOFF"); // ?
                 addAdventEntry("DRAGON", 21, "DRAGON"); // REPLACEME
-            addAdventEntry("HOUSE2", 22, "HOUSE2", "https://www.youtube.com/shorts/73ISAS7pEqE");
+        addAdventEntry("CAVE", 22, "CAVE");
             addAdventEntry("CONVEYOR", 23, "CONVEYOR");
             addAdventEntry("SWITCHBACK", 24, "SWITCHBACK"); // REPLACEME
     }

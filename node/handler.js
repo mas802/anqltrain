@@ -33,6 +33,13 @@ let queue = [];
 
 let trainFailed = "OFF";
 
+function globalTrainState() {
+  let state = "ON";
+  if (trainFailed != "OFF") state = "failed";
+  if (queue.length>1) state = "busy";
+  return state;
+}
+
 const afterColorTimeout = 1000;
 let colorRecorder = [];
 let colorRecorderTimer = null;
@@ -327,13 +334,7 @@ function handleUpdatePath(pathtoset) {
 
 function ensureFront() {
   if (trainLocation != STATIONS.FRONT) {
-    sendOrQueueSafe([trainRelay(10,10,BOOST_WAIT)], BOOST_WAIT);
-    sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
-  }
-}
-
-function ensureFrontSlow() {
-  if (trainLocation != STATIONS.FRONT) {
+    sendOrQueueSafe([trainRelay(20,10,BOOST_WAIT)], BOOST_WAIT);
     sendOrQueueSafe([trainRelay(10,10,BOOST_WAIT)], BOOST_WAIT);
     sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
   }
@@ -397,15 +398,23 @@ function receiveMsg(message) {
     }
   }
 
-  if (queue.length > 1 && queue.length < 7) {
+  if (queue.length > 1 && queue.length < 20) {
 
     // CONSIDER: maybe have a queue prefix and resolve first
     // TODO this should be a list of queueMeCommands
-    if ((message === "toggle:BLUE" || message === "toggle:TRAIN" || message === "toggle:FRONT") ||
-      (message === "toggle:ORANGE" || message === "toggle:UNLOADER") ||
-      (message === "toggle:RED" || message === "toggle:YARD" )||
-      (message === "toggle:GREEN" || message === "toggle:LOADER" || message === "toggle:LOADEE" ||
-      message === "toggle:PATHBACK" || message === "toggle:PATHFRONT")) {
+    if (message === "toggle:BLUE" || 
+      message === "toggle:TRAIN" || 
+      message === "toggle:SWAP" ||
+      message === "toggle:FRONT" ||
+      message === "toggle:ORANGE" || 
+      message === "toggle:UNLOADER" ||
+      message === "toggle:RED" || 
+      message === "toggle:YARD" ||
+      message === "toggle:GREEN" || 
+      message === "toggle:LOADER" || 
+      message === "toggle:LOADEE" ||
+      message === "toggle:PATHBACK" || 
+      message === "toggle:PATHFRONT") {
       sendOrQueueSafe([`relay:${message}`], QUEUE_WAIT);
     }
 
@@ -427,7 +436,7 @@ function receiveMsg(message) {
 
     if (message === "toggle:ORANGE" || message === "toggle:UNLOADER") {
       if (trainLocation === STATIONS.UNLOADER) {
-        ensureFrontSlow();
+        ensureFront();
         trainLocation = STATIONS.FRONT;
       } else {
         handleUpdatePath(STATIONS.UNLOADER);
@@ -470,6 +479,7 @@ function receiveMsg(message) {
         // TODO maybe block for 20 seconds after load
         sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:20`], SHORT_WAIT);
         sendOrQueueSafe([`relay:set:PUMDIRECT:LOADEEMOTOR:55:-20`], SHORT_WAIT);
+        sendOrQueueSafe([`relay:toggle:CONVEYOR`], SHORT_WAIT);
       } else {
         handleUpdatePath(STATIONS.LOADER);
         sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
@@ -507,20 +517,27 @@ function receiveMsg(message) {
         sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
         sendOrQueueSafe([`relay:toggle:FRONT`], QUEUE_WAIT);
     }
+
+
+    if (message === "toggle:SWAP") { // 
+        ensureFront();
+        sendOrQueueSafe([`relay:toggle:LOADER`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:LOADER`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:LOADER`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:YARD`], QUEUE_WAIT);
+        sendOrQueueSafe([`relay:toggle:FRONT`], QUEUE_WAIT);
+    }
   }
 
-  if (message === "info:BLUE" || message === "info:RED" || message === "info:GREEN" || message === "info:ORANGE") {
-// FIXME train state move to decoupler?
-    sendMsg(["state:"+cmd[1]+":ON"]);
-  }
-
-  if (message === "info:TRAIN") {
-    let msg = (trainFailed != "OFF")?"failed":"ON";
-    sendMsg(["state:TRAIN:" + msg]);
-  }
-
-  if (message === "info:SANTA") {
-    sendMsg(["state:SANTA:ON"]);
+  if (message === "info:BLUE" 
+    || message === "info:RED" 
+    || message === "info:GREEN" 
+    || message === "info:ORANGE"
+    || message === "info:TRAIN" 
+    || message === "info:SWAP") {
+    sendMsg(["state:TRAIN:" + globalTrainState()]);
   }
 
   if (message === "info:TRAINCOMP") {
@@ -528,15 +545,20 @@ function receiveMsg(message) {
   }
 
   if (message.startsWith("info:PLAN")) {
-    sendMsg(["state:"+cmd[1]+":" + planCode()]);
+    let state = globalTrainState();
+    let msg = "state:" + cmd[1] + ":" + ((state!="ON")?state:planCode());
+    console.log(msg);
+    sendMsg([msg]);
   }
 
   if (message.startsWith("info:PATHBACK")) {
-    sendMsg(["state:"+cmd[1]+":" + pathback]);
+    let state = globalTrainState();
+    sendMsg(["state:"+cmd[1]+":" + (state!="ON")?state:pathback]);
   }
 
   if (message.startsWith("info:PATHFRONT")) {
-    sendMsg(["state:"+cmd[1]+":" + (path === UNLOADER.YARD?STATIONS.UNLOADER:STATIONS.BACK)]);
+    let state = globalTrainState();
+    sendMsg(["state:"+cmd[1]+":" + (state!="ON")?state:(path === UNLOADER.YARD?STATIONS.UNLOADER:STATIONS.BACK)]);
   }
 
   if (message.startsWith("info:LOADEE")) {
@@ -544,19 +566,27 @@ function receiveMsg(message) {
   }
 
   if (message === "info:YARD") {
-    sendMsg(["state:YARD:COMP_" + compositionAt[STATIONS.YARD].join("")]); // TODO planCode() or maybe just location
+    let state = globalTrainState();
+    sendMsg(["state:YARD:" + (state!="ON")?state:"COMP_" + compositionAt[STATIONS.YARD].join("")]); // TODO planCode() or maybe just location
   }
 
   if (message === "info:LOADER") {
-    sendMsg(["state:LOADER:COMP_" + compositionAt[STATIONS.LOADER].join("")]); // TODO planCode() or maybe just location
+    let state = globalTrainState();
+    sendMsg(["state:LOADER:" + (state!="ON")?state:"COMP_" + compositionAt[STATIONS.LOADER].join("")]); // TODO planCode() or maybe just location
+  }
+
+  if (message === "info:SANTA") {
+    sendMsg(["state:SANTA:ON"]);
   }
 
   if (message === "info:ALLLIGHTS") {
     sendMsg(["state:ALLLIGHTS:ON"]);
   }
+
   if (message === "info:ALLOFF") {
     sendMsg(["state:ALLOFF:ON"]);
   }
+
   if (message === "info:ALLON") {
     sendMsg(["state:ALLON:ON"]);
   }

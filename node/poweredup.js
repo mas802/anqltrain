@@ -50,7 +50,7 @@ function shouldSkipDiscovery(hubId, hubType) {
     return false;
   }
   if (!entry.lastLog || (now - entry.lastLog) > DUPLICATE_LOG_INTERVAL) {
-    console.log(["POWEREDUP INFO skip duplicate discovery", hubId, hubType]);
+    console.log(["POWEREDUP INFO skip duplicate discovery", hubId, hubType, activeHubs]);
     entry.lastLog = now;
   }
   return true;

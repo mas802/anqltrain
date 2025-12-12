@@ -9,12 +9,14 @@ magick  ${SRC_IMG_DIR}/Icon_Simple_Warn.png -resize 40% ${SRC_IMG_DIR}/Icon_Simp
 
 ERRORICON="( ${SRC_IMG_DIR}/Icon_Simple_Warn.png -resize 40%  -fill red -tint 100 ) -gravity northeast -geometry +20+20 -compose over -composite"
 FAILEDICON="( ${SRC_IMG_DIR}/Icon_Simple_Warn.png -resize 40% ) -gravity northeast -geometry +20+20 -compose over -composite"
+BUSYICON="( ${SRC_IMG_DIR}/Ubuntu_Recycling_logo-Blue.png -resize 80x ) -gravity northeast -geometry +20+20 -compose over -composite"
 YOUTUBEICON="( ${SRC_IMG_DIR}/Youtube_logo.png -resize 8% -alpha Set -channel A -evaluate set 70% +channel ) -gravity northeast -geometry +20+20 -compose over -composite"
 
 function common_pics () {
   magick ${IMG_DIR}/${1}_OFF.jpg -modulate 100,0 ${IMG_DIR}/${1}_load.jpg
   magick \( ${IMG_DIR}/${1}_OFF.jpg -modulate 100,0 \) $ERRORICON ${IMG_DIR}/${1}_error.jpg
   magick \( ${IMG_DIR}/${1}_OFF.jpg -modulate 100,0 \) $FAILEDICON ${IMG_DIR}/${1}_failed.jpg
+  magick \( ${IMG_DIR}/${1}_ON.jpg -modulate 100,0 \) $BUSYICON ${IMG_DIR}/${1}_busy.jpg
   magick \( ${IMG_DIR}/${1}_ON.jpg  \) $YOUTUBEICON ${IMG_DIR}/${1}_YOUTUBE.jpg
 }
 
@@ -210,6 +212,11 @@ common_pics HOUSE2
 magick "${SRC_IMG_DIR}/IMG_6968.jpeg" -resize 300x  -crop 300x226+0+140  ${IMG_DIR}/FIRE_ON.jpg
 magick "${SRC_IMG_DIR}/IMG_6971.jpeg" -resize 300x  -crop 300x226+0+140  ${IMG_DIR}/FIRE_OFF.jpg
 common_pics FIRE
+
+
+magick "${SRC_IMG_DIR}/SWAP.png" -resize 300x  -crop 300x226+0+0  ${IMG_DIR}/SWAP_ON.jpg
+magick "${SRC_IMG_DIR}/SWAP.png" -modulate 100,80 -resize 300x  -crop 300x226+0+0  ${IMG_DIR}/SWAP_OFF.jpg
+common_pics SWAP
 
 # magick "${SRC_IMG_DIR}/107_1412/IMGP0958.JPG" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/DRAGON_ON.jpg
 # magick "${SRC_IMG_DIR}/107_1412/IMGP0959.JPG" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/DRAGON_OFF.jpg
