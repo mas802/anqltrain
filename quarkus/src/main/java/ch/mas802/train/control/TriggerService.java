@@ -138,19 +138,19 @@ public class TriggerService {
         addAdventEntry("HOUSE1", 9, "HOUSE1", "https://www.youtube.com/shorts/1Pk2WoBNbSA");
         addAdventEntry("SWAP", 10, "SWAP", "https://www.youtube.com/watch?v=5JWH4Ad17Z8");
         addAdventEntry("HOUSE2", 11, "HOUSE2", "https://www.youtube.com/shorts/73ISAS7pEqE");
-        addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS"); // ?
+        addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS"); 
         addAdventEntry("FIRE", 13, "FIRE", "https://www.youtube.com/shorts/ZI7yNRBOeIw");
-                addAdventEntry("LOADER", 14, "LOADER"); // LOADER
+    addAdventEntry("SWITCHBACK", 14, "SWITCHBACK"); // EASY
             addAdventEntry("GHOSTBUSTERS", 15, "GHOSTBUSTERS");
-            addAdventEntry("ALLON", 16, "ALLON"); // ?
-            addAdventEntry("YARD", 17, "YARD"); // YARD
-                addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT"); // REPLACEME
+                addAdventEntry("ALLON", 16, "ALLON"); // ?
+        addAdventEntry("YARD", 17, "YARD"); // YARD
+    addAdventEntry("ALLOFF", 18, "ALLOFF"); // REPLACE MEDIUM
             addAdventEntry("GUGGE", 19, "GUGGE");
-            addAdventEntry("ALLOFF", 20, "ALLOFF"); // ?
-                addAdventEntry("DRAGON", 21, "DRAGON"); // REPLACEME
+    addAdventEntry("SWITCHFRONT", 20, "SWITCHFRONT"); // REPLACE HARD
+            addAdventEntry("CONVEYOR", 21, "CONVEYOR");
         addAdventEntry("CAVE", 22, "CAVE");
-            addAdventEntry("CONVEYOR", 23, "CONVEYOR");
-            addAdventEntry("SWITCHBACK", 24, "SWITCHBACK"); // REPLACEME
+    addAdventEntry("DRAGON", 23, "DRAGON"); // REPLACEME IMPOSSIBLE
+        addAdventEntry("LOADER", 24, "LOADER"); // LOADER
     }
 
     private void addAdventEntry(String key, int day, String action) {

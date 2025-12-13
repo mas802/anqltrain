@@ -9,10 +9,12 @@
 
 <body>
 
+
 <main>
 <div class="wrapper">
   <div class="train box full"><xmas-start data-label="TRAIN"/></div>
 
+  <div class="box full" id="msg-box" hidden></div>
   <div class="box thirdleft"><xmas-start data-label="PLAN_LOADER"></xmas-start></div>
   <div class="box thirdmiddle"><xmas-start data-label="PLAN_LOADEE"></xmas-start></div>
   <div class="box thirdright"><xmas-start data-label="PLAN_DEMO"></xmas-start></div>
@@ -35,6 +37,26 @@
 
 </main>
 <script src="app.js" type="module"></script>
+
+<script type="module">
+(() => {
+  if (typeof document === 'undefined' || typeof URLSearchParams === 'undefined') {
+    return;
+  }
+  const box = document.getElementById('msg-box');
+  if (!box || typeof window === 'undefined') {
+    return;
+  }
+  const params = new URLSearchParams(window.location.search || '');
+  const msg = params.get('msg');
+  if (!msg) {
+    box.hidden = true;
+    return;
+  }
+  box.textContent = msg;
+  box.hidden = false;
+})();
+</script>
 <script type="module">
 (() => {
   if (typeof document === 'undefined' || typeof customElements === 'undefined') {
