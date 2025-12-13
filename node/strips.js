@@ -40,13 +40,13 @@ const EFFECTS = {
     await controller.switchOn(true);
     await controller.setEffect(effectId, 0, 45, 80, buildRainbowPalette());
   },
-  white: createColorEffect([180, 180, 180]),
+  white: createColorEffect([255, 120, 10]),
   blue: createColorEffect([0, 0, 255]),
   red: createColorEffect([255, 0, 0]),
   yellow: createColorEffect([255, 120, 0]),
   on: async (controller, effectId = 7) => {
     await controller.switchOn(true);
-    await controller.setEffect(effectId, 0, 45, 80, buildWarmWhitePalette());
+    await createColorEffect([255, 120, 10]);
   },
   off: async (controller) => {
     await controller.switchOn(false);
@@ -72,7 +72,6 @@ function buildFirePalette() {
     [198, 48, 6],
   ]);
 }
-
 function buildMonsterPalette() {
   return buildColourDataPacket([
     [160, 230, 160],
@@ -80,8 +79,8 @@ function buildMonsterPalette() {
     [5, 90, 20],
     [20, 130, 40],
     [40, 180, 70],
-    [90, 230, 110],
-    [140, 255, 160],
+    [90, 190, 110],
+    [140, 200, 160],
     [100, 200, 120],
   ]);
 }
@@ -99,17 +98,28 @@ function buildWarmWhitePalette() {
   ]);
 }
 
+const GHOST_BRIGHTNESS_FACTOR = 0.3;
+const GHOST_BASE_COLOURS = [
+  [160, 0, 190],
+  [45, 0, 90],
+  [70, 0, 130],
+  [100, 0, 165],
+  [130, 0, 190],
+  [155, 0, 205],
+  [175, 0, 215],
+];
+
 function buildGhostPalette() {
-  return buildColourDataPacket([
-    [230, 0, 260],
-    [60, 0, 120],
-    [90, 0, 180],
-    [130, 20, 220],
-    [170, 40, 255],
-    [200, 70, 255],
-    [230, 110, 255],
-    [255, 150, 255],
-  ]);
+  const dimmedPalette = new Array(GHOST_BASE_COLOURS.length);
+  for (let i = 0; i < GHOST_BASE_COLOURS.length; i += 1) {
+    const [r, g, b] = GHOST_BASE_COLOURS[i];
+    dimmedPalette[i] = [
+      Math.round(r * GHOST_BRIGHTNESS_FACTOR),
+      Math.round(g * GHOST_BRIGHTNESS_FACTOR),
+      Math.round(b * GHOST_BRIGHTNESS_FACTOR),
+    ];
+  }
+  return buildColourDataPacket(dimmedPalette);
 }
 
 function buildWaterPalette() {

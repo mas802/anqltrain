@@ -27,9 +27,9 @@ var itemMap = new TwoWayMap({
    'UNUSED10' : '10',
    'UNUSED11' : '11',
    'UNUSED12' : '12',
-   'GHOSTBUSTERS' : '13',
+   'ECTO1' : '13',
    'TRACK' : '14', // A0
-   'HOUSE2' : '15', // A1
+   'HOUSEX' : '15', // A1
    'UNUSEDA3' : '16' // A2
 });
 

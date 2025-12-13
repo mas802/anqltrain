@@ -103,6 +103,9 @@ public class TriggerService {
         registerTrigger("MONSTER:ON",  "set:MONSTEREYES:ON", "set:STRIP1:rainbow");
         registerTrigger("MONSTER:OFF", "set:MONSTEREYES:OFF", "set:STRIP1:water");
 
+        registerTrigger("GHOSTBUSTERS:ON",  "set:ECTO1:ON", "set:STRIP1:ghost", "set:STRIP2:ghost", "set:STRIP2:ghost");
+        registerTrigger("GHOSTBUSTERS:OFF", "set:ECTO1:OFF", "set:STRIP2:off", "set:STRIP1:water", "set:STRIP3:off");
+
         registerTrigger("FIRE:ON",  "set:FIRETRUCK:ON", "set:STRIP2:fire");
         registerTrigger("FIRE:OFF", "set:FIRETRUCK:OFF", "set:STRIP2:off");
 
@@ -111,6 +114,9 @@ public class TriggerService {
 
         registerTrigger("HOUSE1:ON",  "set:STRIP2:white");
         registerTrigger("HOUSE1:OFF", "set:STRIP2:off");
+
+        registerTrigger("HOUSE2:ON",  "set:STRIP3:white");
+        registerTrigger("HOUSE2:OFF", "set:STRIP3:off");
 
         registerTrigger("DISCO:ON",  "set:STRIP1:rainbow", "set:STRIP2:rainbow");
         registerTrigger("DISCO:OFF", "set:STRIP1:water", "set:STRIP2:off");
@@ -133,11 +139,11 @@ public class TriggerService {
         addAdventEntry("SWAP", 10, "SWAP", "https://www.youtube.com/watch?v=5JWH4Ad17Z8");
         addAdventEntry("HOUSE2", 11, "HOUSE2", "https://www.youtube.com/shorts/73ISAS7pEqE");
         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS"); // ?
-            addAdventEntry("GHOSTBUSTERS", 13, "GHOSTBUSTERS");
-                addAdventEntry("DECOUPLERBACK", 14, "DECOUPLERBACK"); // LOADER
-            addAdventEntry("FIRE", 15, "FIRE");
+        addAdventEntry("FIRE", 13, "FIRE", "https://www.youtube.com/shorts/ZI7yNRBOeIw");
+                addAdventEntry("LOADER", 14, "LOADER"); // LOADER
+            addAdventEntry("GHOSTBUSTERS", 15, "GHOSTBUSTERS");
             addAdventEntry("ALLON", 16, "ALLON"); // ?
-            addAdventEntry("DECOUPLERFRONT", 17, "DECOUPLERFRONT"); // YARD
+            addAdventEntry("YARD", 17, "YARD"); // YARD
                 addAdventEntry("SWITCHFRONT", 18, "SWITCHFRONT"); // REPLACEME
             addAdventEntry("GUGGE", 19, "GUGGE");
             addAdventEntry("ALLOFF", 20, "ALLOFF"); // ?

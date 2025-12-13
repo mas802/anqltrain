@@ -1,6 +1,8 @@
 package ch.mas802.train.boundary;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -61,7 +63,14 @@ public class WsResource {
         } else if ("relay".equals(command)) {
             int prefixEnd = message.indexOf(':');
             if (prefixEnd >= 0 && message.length() > prefixEnd + 1) {
-                wsService.broadcast(message.substring(prefixEnd + 1));
+                String payload = message.substring(prefixEnd + 1);
+                String trigger = payload.substring(payload.indexOf(':') + 1);
+                Optional<List<String>> handled = triggerService.handleTrigger(trigger);
+                if (handled.isPresent()) {
+                    handled.get().forEach(wsService::broadcast);
+                } else {
+                    wsService.broadcast(payload);
+                }
             }
         } else if ("trigger".equals(command)) {
             int prefixEnd = message.indexOf(':');
