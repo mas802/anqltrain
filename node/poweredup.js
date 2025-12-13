@@ -1,6 +1,7 @@
 const fs = require('fs');
-// FIXME path should be more general
-let config = JSON.parse(fs.readFileSync('/home/train/anqltrain/node/config.json'));
+const path = require('path');
+const configPath = path.resolve(__dirname, '..', 'config.json');
+let config = JSON.parse(fs.readFileSync(configPath));
 
 //
 // BOUNDARY Powered UP

@@ -13,7 +13,7 @@ const {
 } = require('./strips');
 const { connectionPool } = require('./strips-core');
 
-const configPath = path.join(__dirname, 'config.json');
+const configPath = path.resolve(__dirname, '..', 'config.json');
 const config = JSON.parse(fs.readFileSync(configPath));
 const wsUrl = config.stripsWsUrl || process.env.STRIPS_WS_URL || 'ws://localhost:8080/trainws/cli';
 

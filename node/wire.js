@@ -1,5 +1,7 @@
 const fs = require('fs');
-let config = JSON.parse(fs.readFileSync('/home/train/anqltrain/node/config.json'));
+const path = require('path');
+const configPath = path.resolve(__dirname, '..', 'config.json');
+let config = JSON.parse(fs.readFileSync(configPath));
 
 function TwoWayMap(map) {
    this.map = map;
