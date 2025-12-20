@@ -31,7 +31,7 @@ var itemMap = new TwoWayMap({
    'UNUSED12' : '12',
    'ECTO1' : '13',
    'TRACK' : '14', // A0
-   'HOUSEX' : '15', // A1
+   'STARW' : '15', // A1
    'UNUSEDA3' : '16' // A2
 });
 
@@ -72,40 +72,40 @@ var status = {
    'SENSOR3' : 0,
    'HOUSE' : 0,
    'TRACK' : 0,
-   'WHITE1' : 0,
+   'STARW' : 0,
    'WHITE2' : 0,
    'WHITE1R' : 0,
    'WHITE2R' : 0,
    'TRAINDEPRECATED' : "WHITE",
    'CROSSING' : "OFF",
-   'GHOSTBUSTERS': 0
+   'ECTO1': 0
 };
 
 
 var modes = {
-   'MONSTERR' : 7,
+   'MONSTERRX' : 7,
    'MONSTER' : 5,
    'CAVE' : 5,
-   'DRAGON' : 5,
+   'DRAGONX' : 5,
    'FIRETRUCK' : 7,
-   'GHOSTBUSTERS' : 7,
-   'WARNR' : 6,
-   'LIGHTHOUSE' : 5,
+   'ECTO1' : 7,
+   'WARNRX' : 6,
+   'LIGHTHOUSEX' : 5,
    'SIGNAL1' : 7,
    'SIGNAL1R' : 7,
    'SIGNAL2' : 7,
    'SIGNAL2R' : 7,
    'SIGNAL3' : 7,
    'SIGNAL3R' : 7,
-   'SENSOR1' : 0,
-   'SENSOR2' : 0,
-   'SENSOR3' : 0,
+   'SENSOR1X' : 0,
+   'SENSOR2X' : 0,
+   'SENSOR3X' : 0,
    'HOUSE' : 5,
    'TRACK' : 5,
-   'HOUSE1' : 5,
-   'HOUSE2' : 5,
-   'WHITE1' : 7,
-   'WHITE2' : 7,
+   'HOUSE1X' : 5,
+   'STARW' : 1,
+   'WHITE1X' : 7,
+   'WHITE2X' : 7,
 };
 
 
@@ -124,8 +124,8 @@ var statusMap = new TwoWayMap( {
 });
 
 const I2C_TRAIN_ADDR = 0x0e;
-const CROSSING_UP = 121;
-const CROSSING_DOWN = 122;
+const CROSSING_UP = 10;
+const CROSSING_DOWN = 20;
 
 let trainMode = null;
 
@@ -258,6 +258,7 @@ function receiveMsg(message) {
 
     let modus = modes[itemName];
 
+    /*
     if (cmd[1] === "CROSSING" && cmd[0] == "toggle") {
       if (status["CROSSING"] == "OFF") {
         trainMode = CROSSING_DOWN;
@@ -273,6 +274,7 @@ function receiveMsg(message) {
         sendI2C(I2C_TRAIN_ADDR, trainMode, 2, trainDuration, trainValue);
       }
     }
+    */
 
     if (cmd[0] === "toggle" && item1Num != 99) {
       if (m11 && +m11 === item1Num) {

@@ -190,8 +190,10 @@ cp ${IMG_DIR}/YARD_ON.jpg ${IMG_DIR}/YARD_COMP_GG.jpg
 
 quickpic UNLOADER IMG_0800.jpeg IMG_0799.jpeg 80
 quickpic LOADEE IMG_0778.jpeg IMG_0777.jpeg 40
+quickpic CROSSING IMG_0912.jpeg IMG_0911.jpeg 120
 
 quickpic THEFORCE starwarson.png starwarsoff.png 0
+
 
 magick "${SRC_IMG_DIR}/IMG_0851.jpeg" -resize 300x -crop 300x226+0+80 ${IMG_DIR}/SANTA_ON.jpg
 magick ${IMG_DIR}/SANTA_ON.jpg -modulate 100,50 ${IMG_DIR}/SANTA_OFF.jpg
@@ -230,9 +232,6 @@ common_pics SWAP
 # magick "${SRC_IMG_DIR}/IMG_6941.jpeg" -resize x325 -crop 300x226+100+30 -modulate 100,50 ${IMG_DIR}/GUGGE_OFF.jpg
 # common_pics GUGGE
 
-magick "${SRC_IMG_DIR}/IMG_6947.jpeg" -resize x425 -crop 300x226+0+0 ${IMG_DIR}/CROSSING_ON.jpg
-magick ${IMG_DIR}/CROSSING_ON.jpg -modulate 100,50 ${IMG_DIR}/CROSSING_OFF.jpg
-common_pics CROSSING
 
 magick "${SRC_IMG_DIR}/IMG_6978.jpeg" -resize x226 -crop 300x226+0+0 ${IMG_DIR}/GHOSTBUSTERS_ON.jpg
 magick ${IMG_DIR}/GHOSTBUSTERS_ON.jpg -modulate 100,50 ${IMG_DIR}/GHOSTBUSTERS_OFF.jpg

@@ -22,8 +22,8 @@ composition:* -> no use / info
 
 const { exec } = require('child_process');
 const fs = require('fs');
-const path = require('path');
-const configPath = path.resolve(__dirname, '..', 'config.json');
+const pathlib = require('path');
+const configPath = pathlib.resolve(__dirname, '..', 'config.json');
 let config = JSON.parse(fs.readFileSync(configPath));
 
 let lights = config["lights"];
@@ -335,7 +335,7 @@ function handleUpdatePath(pathtoset) {
 
 function ensureFront() {
   if (trainLocation != STATIONS.FRONT) {
-    sendOrQueueSafe([trainRelay(20,10,BOOST_WAIT)], BOOST_WAIT);
+    sendOrQueueSafe(["relay:set:MOTORDIRECT:20:2:7:255", trainRelay(20,10,BOOST_WAIT)], BOOST_WAIT);
     sendOrQueueSafe([trainRelay(10,10,BOOST_WAIT)], BOOST_WAIT);
     sendOrQueueSafe([trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
   }
@@ -423,8 +423,8 @@ function receiveMsg(message) {
 
     if (message === "toggle:BLUE" || message === "toggle:TRAIN" || message === "toggle:FRONT") {
       if (trainLocation === STATIONS.FRONT) {
-        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
-        sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:`+path], CROSSING_WAIT);
+        sendOrQueueSafe(["relay:set:MOTORDIRECT:20:2:7:255", trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([COLORTRIGGER, "relay:set:MOTORDIRECT:10:2:7:255", `relay:set:TRAINLOC:`+path], CROSSING_WAIT);
         trainLocation = path;
         compositionAttached.push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
@@ -441,8 +441,8 @@ function receiveMsg(message) {
         trainLocation = STATIONS.FRONT;
       } else {
         handleUpdatePath(STATIONS.UNLOADER);
-        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
-        sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:UNLOADER`], CROSSING_WAIT);
+        sendOrQueueSafe(["relay:set:MOTORDIRECT:20:2:7:255", trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([COLORTRIGGER,"relay:set:MOTORDIRECT:10:2:7:255", `relay:set:TRAINLOC:UNLOADER`], CROSSING_WAIT);
         trainLocation = STATIONS.UNLOADER;
       }
     }
@@ -453,8 +453,8 @@ function receiveMsg(message) {
         compositionAt[STATIONS.YARD] = handleDecouplerAction(2, "DECOUPLERFRONT");
       } else {
         handleUpdatePath(STATIONS.YARD);
-        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
-        sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:YARD`], CROSSING_WAIT);
+        sendOrQueueSafe(["relay:set:MOTORDIRECT:20:2:7:255", trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([COLORTRIGGER, "relay:set:MOTORDIRECT:10:2:7:255", `relay:set:TRAINLOC:YARD`], CROSSING_WAIT);
         trainLocation = STATIONS.YARD;
         compositionAttached.push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
@@ -466,8 +466,8 @@ function receiveMsg(message) {
         compositionAt[STATIONS.LOADER] = handleDecouplerAction(1, "DECOUPLERBACK");
       } else {
         handleUpdatePath(STATIONS.LOADER);
-        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
-        sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
+        sendOrQueueSafe(["relay:set:MOTORDIRECT:20:2:7:255", trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([COLORTRIGGER, "relay:set:MOTORDIRECT:10:2:7:255", `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
         trainLocation = STATIONS.LOADER;
         compositionAttached.push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
@@ -483,8 +483,8 @@ function receiveMsg(message) {
         sendOrQueueSafe([`relay:toggle:CONVEYOR`], SHORT_WAIT);
       } else {
         handleUpdatePath(STATIONS.LOADER);
-        sendOrQueueSafe([trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
-        sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
+        sendOrQueueSafe(["relay:set:MOTORDIRECT:20:2:7:255", trainRelay(20,2,FULL_ROUND)], FULL_ROUND);
+        sendOrQueueSafe([COLORTRIGGER, "relay:set:MOTORDIRECT:10:2:7:255", `relay:set:TRAINLOC:LOADER`], CROSSING_WAIT);
         trainLocation = STATIONS.LOADER;
         compositionAttached.push(...compositionAt[trainLocation]);
         compositionAt[trainLocation] = [];
@@ -568,12 +568,12 @@ function receiveMsg(message) {
 
   if (message === "info:YARD") {
     let state = globalTrainState();
-    sendMsg(["state:YARD:" + (state!="ON")?state:"COMP_" + compositionAt[STATIONS.YARD].join("")]); // TODO planCode() or maybe just location
+    sendMsg(["state:YARD:" +  state]); // TODO planCode() or maybe just location
   }
 
   if (message === "info:LOADER") {
     let state = globalTrainState();
-    sendMsg(["state:LOADER:" + (state!="ON")?state:"COMP_" + compositionAt[STATIONS.LOADER].join("")]); // TODO planCode() or maybe just location
+    sendMsg(["state:LOADER:" +  state]);
   }
 
   if (message === "info:SANTA") {

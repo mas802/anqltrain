@@ -246,7 +246,7 @@ poweredUP.on("discover", async (hub) => {
       } else if (hub.primaryMACAddress == config["hubAddr"]["DECOUPLERHUB"]) {
         console.log(`INFO: Connected to DECOUPLERHUB moveHub (${hub.name} / ${hubname} / ${hub.primaryMACAddress}))!`);
 
-        hubled.setColor(PoweredUP.Consts.Color.BLUE);
+        hubled.setColor(PoweredUP.Consts.Color.RED);
 
         motorConfig["DECOUPLERFRONT"].motor = await hub.waitForDeviceAtPort("A");
 
@@ -344,6 +344,10 @@ function receiveMsg(message) {
     if (dmconfig) {
       runMotor(dmconfig, cmd[3], cmd[4])
     }
+  }
+
+  if (cmd[0] === "toggle" && cmd[1] === "PURESTART") {
+    exit(1);
   }
 
   let mconfig = motorConfig[cmd[1]]

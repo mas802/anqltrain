@@ -69,7 +69,8 @@ public class WsService {
 
     public Status info(final String key) {
         if (triggerService.handlesKey(key)) {
-            return statusRepository.getStatus(key);
+            var status = statusRepository.getStatus(key);
+            return (status.until==-1)?new Status("OFF", -1, 500, status.data):status;
         }
         return execute(key, "info");
     }

@@ -94,8 +94,8 @@ public class TriggerService {
         registerTrigger("CONTROL3:ON",  "set:PUMDIRECT:CONVEYOR:45:-20");
         registerTrigger("CONTROL3:OFF", "set:PUMDIRECT:CONVEYOR:45:20");
 
-        registerTrigger("CONTROL4:ON",  "set:MOTORDIRECT:10:3:100:103");
-        registerTrigger("CONTROL4:OFF", "set:MOTORDIRECT:20:3:100:103");
+        registerTrigger("CROSSING:ON",  "set:MOTORDIRECT:10:2:7:255");
+        registerTrigger("CROSSING:OFF", "set:MOTORDIRECT:20:2:7:255");
 
         registerTrigger("WATER:ON",  "set:STRIP1:water");
         registerTrigger("WATER:OFF", "set:STRIP1:off");
@@ -103,7 +103,7 @@ public class TriggerService {
         registerTrigger("MONSTER:ON",  "set:MONSTEREYES:ON", "set:STRIP1:rainbow");
         registerTrigger("MONSTER:OFF", "set:MONSTEREYES:OFF", "set:STRIP1:water");
 
-        registerTrigger("GHOSTBUSTERS:ON",  "set:ECTO1:ON", "set:STRIP1:ghost", "set:STRIP2:ghost", "set:STRIP2:ghost");
+        registerTrigger("GHOSTBUSTERS:ON",  "set:ECTO1:ON", "set:STRIP1:ghost", "set:STRIP2:ghost", "set:STRIP3:ghost");
         registerTrigger("GHOSTBUSTERS:OFF", "set:ECTO1:OFF", "set:STRIP2:off", "set:STRIP1:water", "set:STRIP3:off");
 
         registerTrigger("FIRE:ON",  "set:FIRETRUCK:ON", "set:STRIP2:fire");
@@ -141,16 +141,16 @@ public class TriggerService {
         addAdventEntry("ALLLIGHTS", 12, "ALLLIGHTS"); 
         addAdventEntry("FIRE", 13, "FIRE", "https://www.youtube.com/shorts/ZI7yNRBOeIw");
     addAdventEntry("SWITCHBACK", 14, "SWITCHBACK"); // EASY
-            addAdventEntry("GHOSTBUSTERS", 15, "GHOSTBUSTERS");
-                addAdventEntry("ALLON", 16, "ALLON"); // ?
-        addAdventEntry("YARD", 17, "YARD"); // YARD
+        addAdventEntry("YARD", 15, "YARD", "https://www.youtube.com/shorts/Ost0KQrj7NI"); // YARD
+        addAdventEntry("CROSSING", 16, "CROSSING", "https://www.youtube.com/shorts/0vwLHpHNKAs"); // ?
+            addAdventEntry("GHOSTBUSTERS", 17, "GHOSTBUSTERS");
     addAdventEntry("ALLOFF", 18, "ALLOFF"); // REPLACE MEDIUM
             addAdventEntry("GUGGE", 19, "GUGGE");
     addAdventEntry("SWITCHFRONT", 20, "SWITCHFRONT"); // REPLACE HARD
             addAdventEntry("CONVEYOR", 21, "CONVEYOR");
         addAdventEntry("CAVE", 22, "CAVE");
     addAdventEntry("DRAGON", 23, "DRAGON"); // REPLACEME IMPOSSIBLE
-        addAdventEntry("LOADER", 24, "LOADER"); // LOADER
+        addAdventEntry("LOADER", 24, "LOADER", "https://www.youtube.com/shorts/ffeioz1HLPI"); // LOADER
     }
 
     private void addAdventEntry(String key, int day, String action) {
