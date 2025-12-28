@@ -118,8 +118,8 @@ public class TriggerService {
         registerTrigger("HOUSE2:ON",  "set:STRIP3:white");
         registerTrigger("HOUSE2:OFF", "set:STRIP3:off");
 
-        registerTrigger("DISCO:ON",  "set:STRIP1:rainbow", "set:STRIP2:rainbow");
-        registerTrigger("DISCO:OFF", "set:STRIP1:water", "set:STRIP2:off");
+        registerTrigger("DISCO:ON",  "set:STRIP1:rainbow", "set:STRIP2:rainbow", "set:STRIP3:rainbow");
+        registerTrigger("DISCO:OFF", "set:STRIP1:water", "set:STRIP2:off", "set:STRIP3:off");
 
         System.out.println("Initialized " + triggers.size() + " triggers");
     }

@@ -305,7 +305,7 @@ function handleDecouplerAction(splitLength, decoupler) {
 
   sendOrQueueSafe([trainRelay(20,2,BOOST_WAIT)], BOOST_WAIT);
   sendOrQueueSafe([`${decouplerRelay}:ON`], CROSSING_WAIT);
-  sendOrQueueSafe([trainRelay(10,100,BOOST_WAIT)], BOOST_WAIT);
+  sendOrQueueSafe([trainRelay(10,120,BOOST_WAIT)], BOOST_WAIT);
   sendOrQueueSafe([`${decouplerRelay}:OFF`, trainRelay(10,0,FULL_ROUND)], FULL_ROUND);
   sendOrQueueSafe([COLORTRIGGER, `relay:set:TRAINLOC:FRONT`], CROSSING_WAIT);
   trainLocation = STATIONS.FRONT;
