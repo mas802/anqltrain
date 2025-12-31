@@ -81,54 +81,174 @@ function releaseHubId(hubId) {
 
 let motorConfig = {
 "SWITCHFRONT" : {
+  label: "SWITCHFRONT",
   motor: null,
   state: "OFF",
   degrees: 90,
   speed: 120,
   led: null,
-  mode: "toggle"
+  mode: "toggle",
+  hub: null,
+  port: null,
+  hubName: null,
+  recovering: null
 },
 "SWITCHBACK" : {
+  label: "SWITCHBACK",
   motor: null,
   state: "OFF",
   degrees: 90,
   speed: 120,
   led: null,
-  mode: "toggle"
+  mode: "toggle",
+  hub: null,
+  port: null,
+  hubName: null,
+  recovering: null
 },
 "CONVEYOR" : {
+  label: "CONVEYOR",
   motor: null,
   state: "OFF",
   degrees: 720,
   speed: -80,
   led: null,
-  mode: "normal"
+  mode: "normal",
+  hub: null,
+  port: null,
+  hubName: null,
+  recovering: null
 },
 "LOADEEMOTOR" : {
+  label: "LOADEEMOTOR",
   motor: null,
   state: "OFF",
   degrees: 45,
   speed: -20,
   led: null,
-  mode: "toggle"
+  mode: "toggle",
+  hub: null,
+  port: null,
+  hubName: null,
+  recovering: null
 },
 "DECOUPLERBACK" : {
+  label: "DECOUPLERBACK",
   motor: null,
   state: "OFF",
   degrees: 160,
   speed: 5,
   led: null,
-  mode: "toggle"
+  mode: "toggle",
+  hub: null,
+  port: null,
+  hubName: null,
+  recovering: null
 },
 "DECOUPLERFRONT" : {
+  label: "DECOUPLERFRONT",
   motor: null,
   state: "OFF",
   degrees: 280,
   speed: 5,
   led: null,
-  mode: "toggle"
+  mode: "toggle",
+  hub: null,
+  port: null,
+  hubName: null,
+  recovering: null
 }
+};
+
+async function registerMotorDevice(motorName, hub, port, hubled, hubname) {
+  const entry = motorConfig[motorName];
+  if (!entry) {
+    console.warn(`WARN: received config for unknown motor ${motorName}`);
+    return;
+  }
+  try {
+    entry.motor = await hub.waitForDeviceAtPort(port);
+    entry.hub = hub;
+    entry.port = port;
+    entry.hubName = hubname || hub.name || hub.primaryMACAddress;
+    entry.led = hubled || entry.led;
+    console.log(`INFO: bound motor ${motorName} to ${entry.hubName} port ${port}`);
+  } catch (err) {
+    console.warn(`WARN: unable to bind motor ${motorName} on port ${port}`, err.message || err);
+    entry.motor = null;
+  }
 }
+
+function clearMotorsForHub(hub) {
+  Object.values(motorConfig).forEach(cfg => {
+    if (cfg.hub === hub) {
+      cfg.motor = null;
+      cfg.hub = null;
+      cfg.port = null;
+      cfg.recovering = null;
+      if (cfg.led) {
+        cfg.led = null;
+      }
+    }
+  });
+}
+
+async function recoverMotor(mconfig) {
+  if (!mconfig) {
+    return false;
+  }
+  if (mconfig.recovering) {
+    return mconfig.recovering;
+  }
+  if (!mconfig.hub || !mconfig.port) {
+    scanWithStop(10000);
+    return false;
+  }
+  const label = mconfig.label || "UNKNOWN";
+  mconfig.recovering = (async () => {
+    console.log(`INFO: attempt motor recovery for ${label}`);
+    try {
+      mconfig.motor = await mconfig.hub.waitForDeviceAtPort(mconfig.port);
+      console.log(`INFO: motor ${label} recovered on port ${mconfig.port}`);
+      return true;
+    } catch (err) {
+      console.warn(`WARN: motor ${label} recovery failed`, err.message || err);
+      return false;
+    } finally {
+      mconfig.recovering = null;
+    }
+  })();
+  return mconfig.recovering;
+}
+
+async function ensureMotorConnected(mconfig) {
+  if (!mconfig) {
+    return false;
+  }
+  if (mconfig.motor && mconfig.motor.connected) {
+    return true;
+  }
+  const label = mconfig.label || "UNKNOWN";
+  if (!mconfig.motor) {
+    console.log(`WARN: motor missing (${label})`);
+  } else if (!mconfig.motor.connected) {
+    console.log(`WARN: motor disconnected (${label})`);
+    mconfig.motor = null;
+  }
+  return await recoverMotor(mconfig);
+}
+
+const MOTOR_HEALTH_INTERVAL = 5000;
+setInterval(() => {
+  Object.values(motorConfig).forEach(cfg => {
+    if (!cfg || !cfg.hub || !cfg.port) {
+      return;
+    }
+    if (!cfg.motor || !cfg.motor.connected) {
+      recoverMotor(cfg);
+    }
+  });
+});
 
 poweredUP.on("discover", async (hub) => {
 
@@ -150,6 +270,7 @@ poweredUP.on("discover", async (hub) => {
     console.log(["POWEREDUP INFO connect ", hubId, hub.primaryMACAddress, hub.uuid, hub.type]);
     hub.on("disconnect", () => {
       releaseHub();
+      clearMotorsForHub(hub);
       console.log("disconnect hub " + hubId + " - " + hub.primaryMACAddress + " - " + hub.uuid + " - " + hub.type);
     });
 
@@ -201,11 +322,13 @@ poweredUP.on("discover", async (hub) => {
 
       let hubled = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.HUB_LED);
 
-      for (var port in config.movehubConfigs[hubname]) {
-        let motor = config.movehubConfigs[hubname][port].motor;
-        console.log(`config connect ${hubname} port: ${port} to motor ${motor}`);
-        motorConfig[motor].motor = await hub.waitForDeviceAtPort(port);
-        motorConfig[motor].led = hubled;
+      const hubMotorConfig = (config.movehubConfigs || {})[hubname];
+      if (hubMotorConfig) {
+        for (var port in hubMotorConfig) {
+          let motor = hubMotorConfig[port].motor;
+          console.log(`config connect ${hubname} port: ${port} to motor ${motor}`);
+          await registerMotorDevice(motor, hub, port, hubled, hubname);
+        }
       }
 
       if (hub.primaryMACAddress == config["hubAddr"]["CONVEYORHUB"]) {
@@ -229,8 +352,8 @@ poweredUP.on("discover", async (hub) => {
 
         hubled.setColor(PoweredUP.Consts.Color.GREEN);
 
-        motorConfig["SWITCHFRONT"].motor = await hub.waitForDeviceAtPort("C");
-        motorConfig["SWITCHBACK"].motor = await hub.waitForDeviceAtPort("A");
+        await registerMotorDevice("SWITCHFRONT", hub, "C", hubled, hubname);
+        await registerMotorDevice("SWITCHBACK", hub, "A", hubled, hubname);
 
         let sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
         sensor.setColor(PoweredUP.Consts.Color.WHITE);
@@ -248,9 +371,9 @@ poweredUP.on("discover", async (hub) => {
 
         hubled.setColor(PoweredUP.Consts.Color.RED);
 
-        motorConfig["DECOUPLERFRONT"].motor = await hub.waitForDeviceAtPort("A");
+        await registerMotorDevice("DECOUPLERFRONT", hub, "A", hubled, hubname);
 
-        motorConfig["DECOUPLERBACK"].motor = await hub.waitForDeviceAtPort("B");
+        await registerMotorDevice("DECOUPLERBACK", hub, "B", hubled, hubname);
 
         hub.on("button", (device) => {
           buttonHandler(device, "DECOUPLER", PoweredUP.Consts.ButtonState.PRESSED);
@@ -275,21 +398,8 @@ poweredUP.on("discover", async (hub) => {
 // PoweredUp Actions
 //
 
-function isMotorConnected(mconfig) {
-  if (!mconfig.motor) {
-    console.log("WARN: motor missing");
-    return false;
-  }
-  if (!mconfig.motor.connected) {
-    console.log("WARN: motor disconnected");
-    mconfig.motor = null;
-    return false;
-  }
-  return true;
-}
-
 async function setMotor(mconfig, goal) {
-  if (!isMotorConnected(mconfig)) return;
+  if (!await ensureMotorConnected(mconfig)) return;
   let dir = mconfig.speed;
   if (goal === "OFF" && mconfig.mode == "toggle") dir = -dir;
   mconfig.state = goal;
@@ -304,7 +414,7 @@ async function toggleMotor(mconfig) {
 }
 
 async function runMotor(mconfig, degrees, speed) {
-  if (!isMotorConnected(mconfig)) return;
+  if (!await ensureMotorConnected(mconfig)) return;
   console.log("direct set motor to: " + [degrees, speed])
   return await mconfig.motor.rotateByDegrees(degrees, speed)
       .catch(e => {console.warn([e, new Date().toISOString() + " motor to far", mconfig])});
