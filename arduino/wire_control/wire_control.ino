@@ -1,6 +1,23 @@
 #include <Wire.h>
 
+// Override with compiler.cpp.extra_flags at build time.
+#ifndef I2C_SLAVE_ADDRESS
 #define I2C_SLAVE_ADDRESS 11
+#endif
+
+#if I2C_SLAVE_ADDRESS < 0x08 || I2C_SLAVE_ADDRESS > 0x77
+#error "I2C_SLAVE_ADDRESS must be between 0x08 and 0x77"
+#endif
+
+#ifndef WIRE_CONTROL_PINS
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_MEGA)
+#define WIRE_CONTROL_PINS 22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53
+#elif defined(ARDUINO_AVR_UNO)
+#define WIRE_CONTROL_PINS 2,3,4,5,6,7,8,9,10,11,12,13,A0,A1,A2,A3
+#else
+#error "Define WIRE_CONTROL_PINS for this board"
+#endif
+#endif
 
 #define PAYLOAD_SIZE 4
 
@@ -20,9 +37,16 @@ const int STATUS_BLINK_ON    = 10;
 const int STATUS_BLINK_OFF   = 11;
 
 
-int pin[]    {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, A0, A1, A2, A3, A4, A5,  0,  0,  0,  0};
-int status[] {  0,  0,  0,  1,  1,  0,  6,  6,  0,  1,  0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
-int value[]  {  0,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
+const int pin[] = {WIRE_CONTROL_PINS};
+const int PIN_COUNT = sizeof(pin) / sizeof(pin[0]);
+// AVR Wire can return at most 32 status bytes per request.
+static_assert(PIN_COUNT > 0 && PIN_COUNT <= 32, "Configure between 1 and 32 pins");
+int status[PIN_COUNT] = {};
+int value[PIN_COUNT] = {};
+
+bool validItem(int item) {
+  return item >= 0 && item < PIN_COUNT;
+}
 
 
 const int delta = 600;
@@ -48,12 +72,17 @@ void setup()
   Wire.onRequest(requestEvents);
   Wire.onReceive(receiveEvents);
 
-  for (int i = 0; i<16; i++) {
-    pinMode(i, OUTPUT);
+  for (int i = 0; i<PIN_COUNT; i++) {
+    pinMode(pin[i], OUTPUT);
   }
 
-  for (int i = 0; i<16; i++) {
-    doAction(status[i], i, 99);
+  for (int i = 0; i<PIN_COUNT; i++) {
+    // Every second channel starts on: indices 1, 3, 5, ...
+    if (i % 2 == 1) {
+      turnOn(i);
+    } else {
+      turnOff(i);
+    }
   }
 }
 
@@ -61,7 +90,7 @@ void setup()
 void requestEvents()
 {
     Serial.print(F("requestEvents START -- "));
-    for ( int i = 0; i<16; i++ ) {
+    for ( int i = 0; i<PIN_COUNT; i++ ) {
       Wire.write(status[i]);
       Serial.print(status[i]);
       Serial.print(" ");
@@ -74,6 +103,11 @@ void receiveEvents(int numBytes)
 {
   Serial.print(F("---> recieved events \tnum= "));
   Serial.println(numBytes);
+
+  if (Wire.available() < PAYLOAD_SIZE) {
+    while (Wire.available()) Wire.read();
+    return;
+  }
 
   // clear queue
   while(PAYLOAD_SIZE < Wire.available()) // loop through all but the last
@@ -130,7 +164,7 @@ void doAction(int action, int item1, int item2) {
 
 void blinkUpdate(int time) {
 
-  for(int i=0; i<16; i++) {
+  for(int i=0; i<PIN_COUNT; i++) {
     if ( status[i] == STATUS_BLINK ) {
       blink(i);
     } 
@@ -160,7 +194,7 @@ void smallUpdate( int counter ) {
   }
   */
 
-  for(int i=0; i<16; i++) {
+  for(int i=0; i<PIN_COUNT; i++) {
 
   // FLICKER ON
   if ( status[i] == STATUS_TRANS_ON) {
@@ -205,18 +239,21 @@ void loop() {
 
 
 void turnOn( int item ) {
+  if (!validItem(item)) return;
   Serial.print("Turn item on: "); Serial.println(item);
   digitalWrite(pin[item], HIGH);
   status[item]=STATUS_ON;
 }
 
 void turnOff( int item ) {
+  if (!validItem(item)) return;
   Serial.print("Turn item off: "); Serial.println(item);
   digitalWrite(pin[item], LOW);
   status[item]=STATUS_OFF;
 }
 
 void turnA( int item1, int item2 ) {
+  if (!validItem(item1) || !validItem(item2)) return;
   Serial.print("Turn item A: "); Serial.println(item1);
   digitalWrite(pin[item1], HIGH);
   digitalWrite(pin[item2], LOW);
@@ -225,6 +262,7 @@ void turnA( int item1, int item2 ) {
 }
 
 void turnB( int item1, int item2 ) {
+  if (!validItem(item1) || !validItem(item2)) return;
   Serial.print("Turn item B: "); Serial.println(item1);
   digitalWrite(pin[item1], LOW);
   digitalWrite(pin[item2], HIGH);
@@ -241,6 +279,7 @@ void turnRed( int item1, int item2 ) {
 }
 
 void flickerOn( int item, int duration ) {
+  if (!validItem(item)) return;
   if ( status[item] != STATUS_ON ) {
       status[item] = STATUS_TRANS_ON;
       value[item] = duration;
@@ -248,6 +287,7 @@ void flickerOn( int item, int duration ) {
 }
 
 void flickerOff( int item, int duration ) {
+  if (!validItem(item)) return;
   if ( status[item] != STATUS_OFF ) {
       status[item] = STATUS_TRANS_OFF;
       value[item] = duration;
@@ -255,6 +295,7 @@ void flickerOff( int item, int duration ) {
 }
 
 void toggleBlink( int item ) {
+  if (!validItem(item)) return;
   if (status[item] != STATUS_BLINK) {
     blink(item);
   } else {
@@ -263,12 +304,14 @@ void toggleBlink( int item ) {
 }
 
 void blink( int item ) {
+  if (!validItem(item)) return;
   status[item] = STATUS_BLINK;
   value[item] = !value[item];
   digitalWrite(pin[item], value[item]);
 }
 
 void toggle( int item ) {
+  if (!validItem(item)) return;
   Serial.print("Toggle item: "); Serial.println(item);
   switch ( status[item] ) {
     case STATUS_ON:
@@ -286,6 +329,7 @@ void toggle( int item ) {
 
 
 void flickerToggle( int item, int duration ) {
+  if (!validItem(item)) return;
   Serial.print("Toggle item flicker: "); Serial.println(item);
   switch ( status[item] ) {
     case STATUS_ON:

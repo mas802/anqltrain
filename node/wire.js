@@ -3,113 +3,58 @@ const path = require('path');
 const configPath = path.resolve(__dirname, '..', 'config.json');
 let config = JSON.parse(fs.readFileSync(configPath));
 
-function TwoWayMap(map) {
-   this.map = map;
-   this.reverseMap = {};
-   for(var key in map) {
-      var value = map[key];
-      this.reverseMap[value] = key;
-   }
+// Channel indices refer to the pin list already flashed onto each Arduino.
+function loadWireBoards(config) {
+  if (!config || typeof config !== 'object' || Array.isArray(config)) {
+    throw new Error('config.wireBoards must be an object');
+  }
+  const names = new Set();
+  const addresses = new Set();
+  return Object.entries(config).map(([name, board]) => {
+    if (!board || !Number.isInteger(board.address) || board.address < 8 || board.address > 119 || addresses.has(board.address)) {
+      throw new Error(`Invalid or duplicate I2C address for ${name}`);
+    }
+    addresses.add(board.address);
+    if (!Number.isInteger(board.channelCount) || board.channelCount < 1 || board.channelCount > 32) {
+      throw new Error(`Invalid channelCount for ${name}`);
+    }
+    if (!board.items || typeof board.items !== 'object' || Array.isArray(board.items)) {
+      throw new Error(`Invalid items for ${name}`);
+    }
+    const indices = new Map();
+    for (const [itemName, item] of Object.entries(board.items)) {
+      if (names.has(itemName)) throw new Error(`Duplicate item ${itemName}`);
+      names.add(itemName);
+      if (!item || !Number.isInteger(item.index) || item.index < 0 || item.index >= board.channelCount) {
+        throw new Error(`Invalid index ${JSON.stringify(item && item.index)} for ${itemName} on ${name}: expected an integer from 0 to ${board.channelCount - 1} (channelCount=${board.channelCount})`);
+      }
+      if (indices.has(item.index)) {
+        throw new Error(`Duplicate index ${item.index} on ${name}: ${itemName} and ${indices.get(item.index)}`);
+      }
+      indices.set(item.index, itemName);
+      if (![0, 1, 5, 6, 7].includes(item.mode)) throw new Error(`Invalid mode for ${itemName}`);
+    }
+    for (const [itemName, item] of Object.entries(board.items)) {
+      if (item.pairedItem !== undefined && (item.pairedItem === itemName || !Object.hasOwn(board.items, item.pairedItem))) {
+        throw new Error(`pairedItem for ${itemName} must refer to another item on the same board`);
+      }
+    }
+    return { ...board, name };
+  });
 }
 
-TwoWayMap.prototype.get = function(key){ return this.map[key]; };
-TwoWayMap.prototype.revGet = function(key){ return this.reverseMap[key]; };
+const boards = loadWireBoards(config.wireBoards);
+const itemsByName = new Map();
+const status = { CROSSING: 'OFF' };
+for (const board of boards) {
+  board.buffer = Buffer.alloc(board.channelCount, 99);
+  for (const [name, item] of Object.entries(board.items)) {
+    itemsByName.set(name, { ...item, board });
+    status[name] = 99;
+  }
+}
 
-var itemMap = new TwoWayMap({
-   'DONOTUSE0' : '0',
-   'DONOTUSE1' : '1',
-   'HOUSE' : '2',
-   'MONSTEREYES' : '3',
-   'CAVE' : '4',
-   'FIRETRUCK' : '5',
-   'UNUSED06' : '6',
-   'UNUSED07' : '7',
-   'SIGNAL3' : '8',
-   'SIGNAL3R' : '9',
-   'UNUSED10' : '10',
-   'UNUSED11' : '11',
-   'UNUSED12' : '12',
-   'ECTO1' : '13',
-   'TRACK' : '14', // A0
-   'STARW' : '15', // A1
-   'UNUSEDA3' : '16' // A2
-});
-
-var itemMap2 = new TwoWayMap({
-   'UNUSED20' : '0',
-   'UNUSED21' : '1',
-   'UNUSED22' : '2',
-   'UNUSED23' : '3',
-   'UNUSED24' : '4',
-   'UNUSED25' : '5',
-   'UNUSED26' : '6',
-   'UNUSED27' : '7',
-   'UNUSED28' : '8',
-   'UNUSED29' : '9',
-   'UNUSED210' : '10',
-   'UNUSED211' : '11',
-   'UNUSED212' : '12',
-   'UNUSED213' : '13',
-   'UNUSED214' : '14',
-   'UNUSED215' : '15',
-   'UNUSED216' : '16'
-});
-
-var status = {
-   'MONSTER' : 0,
-   'CAVE' : 0,
-   'FIRETRUCK' : 0,
-   'DRAGON' : 0, 
-   'LIGHTHOUSE' : 0,
-   'SIGNAL1' : 0,
-   'SIGNAL1R' : 0,
-   'SIGNAL2' : 0,
-   'SIGNAL2R' : 0,
-   'SIGNAL3' : 0,
-   'SIGNAL3R' : 0,
-   'SENSOR1' : 0,
-   'SENSOR2' : 0,
-   'SENSOR3' : 0,
-   'HOUSE' : 0,
-   'TRACK' : 0,
-   'STARW' : 0,
-   'WHITE2' : 0,
-   'WHITE1R' : 0,
-   'WHITE2R' : 0,
-   'TRAINDEPRECATED' : "WHITE",
-   'CROSSING' : "OFF",
-   'ECTO1': 0
-};
-
-
-var modes = {
-   'MONSTERRX' : 7,
-   'MONSTER' : 5,
-   'CAVE' : 5,
-   'DRAGONX' : 5,
-   'FIRETRUCK' : 7,
-   'ECTO1' : 7,
-   'WARNRX' : 6,
-   'LIGHTHOUSEX' : 5,
-   'SIGNAL1' : 7,
-   'SIGNAL1R' : 7,
-   'SIGNAL2' : 7,
-   'SIGNAL2R' : 7,
-   'SIGNAL3' : 7,
-   'SIGNAL3R' : 7,
-   'SENSOR1X' : 0,
-   'SENSOR2X' : 0,
-   'SENSOR3X' : 0,
-   'HOUSE' : 5,
-   'TRACK' : 5,
-   'HOUSE1X' : 5,
-   'STARW' : 1,
-   'WHITE1X' : 7,
-   'WHITE2X' : 7,
-};
-
-
-var statusMap = new TwoWayMap( {
+const statusMap = {
     "0" : "OFF", // MULTIPLE OFF
     "1" : "ON",  // REGULAR ON
     "2" : "A",   // SIGNAL ON
@@ -121,7 +66,7 @@ var statusMap = new TwoWayMap( {
     "10" : "ON",  // BLINK ON
     "11" : "OFF",  // BLINK OFF
     "99" : "failed"
-});
+};
 
 const I2C_TRAIN_ADDR = 0x0e;
 const CROSSING_UP = 10;
@@ -134,42 +79,28 @@ let trainMode = null;
 //
 
 const i2c = require('i2c-bus');
-const I2C_ADDR1 = 0x0b;
-const I2C_ADDR2 = 0x0c;
-const rbuffer = Buffer.alloc(16);
-const rbuffer2 = Buffer.alloc(16);
 const wbuffer = Buffer.alloc(16);
-const wbuffer2 = Buffer.alloc(16);
 
 const i2c1 = i2c.open(4, true, function (err) {
     if (err)  console.log(err);
 });
 
-lastread = 0;
-readI2C = function() {
-  if ( Date.now()-lastread > 1000) {
-    lastread = Date.now();
-    i2c1.i2cRead(I2C_ADDR1, 16, rbuffer, function (err,n) {
-      if (err) {
-        console.log(err);
-        for (i=0; i<16; i++) {
-          rbuffer[i] = 99;
-        }
+let lastread = 0;
+let pendingRead = null;
+function readI2C() {
+  if (pendingRead) return pendingRead;
+  if (Date.now() - lastread < 1000) return Promise.resolve();
+  lastread = Date.now();
+  pendingRead = Promise.all(boards.map(board => new Promise(resolve => {
+    i2c1.i2cRead(board.address, board.channelCount, board.buffer, (err, bytesRead) => {
+      if (err || bytesRead !== board.channelCount) {
+        if (err) console.log(err);
+        board.buffer.fill(99);
       }
-      // console.debug(rbuffer);
+      resolve();
     });
-
-    // i2c1.i2cRead(I2C_ADDR2, 16, rbuffer2, function (err,n) {
-    //   if (err) {
-    //     console.log(err);
-    //     for (i=0; i<16; i++) {
-    //       rbuffer2[i] = 99;
-    //     }
-    //   }
-    // console.debug(rbuffer2);
-    // });
-
-  }
+  }))).finally(() => { pendingRead = null; });
+  return pendingRead;
 }
 
 sendI2C1 = function(addr,item) {
@@ -230,113 +161,49 @@ function sendMsg(msg) {
 }
 
 function receiveMsg(message) {
-  cmd = message.split(":");
-  itemName = cmd[1];
+  const cmd = message.split(':');
+  const itemName = cmd[1];
 
-  if (cmd[1] === "TRAINLED" && cmd[0] === "set") {
-    console.log(["why does this exist and what does it do?", cmd])
-    status["TRAIN"] = cmd[2];
+  if (itemName === 'TRAINLED' && cmd[0] === 'set') {
+    status.TRAIN = cmd[2];
+    return;
   }
-
-  if (cmd[1] === "MOTORDIRECT" && cmd[0] == "set") {
-    console.log(["MOTORDIRECT", cmd]);
+  if (itemName === 'MOTORDIRECT' && cmd[0] === 'set') {
     sendI2C(I2C_TRAIN_ADDR, cmd[2], cmd[3], cmd[4], cmd[5]);
+    return;
+  }
+  if (cmd[0] === 'info') {
+    statusSync(false, itemName);
+    return;
   }
 
-  if (status[itemName] != undefined) {
-
-    console.log("Received WIRE relevant message: '" + message + "'");
-    // console.debug(["item nos", cmd[0], itemName, m11, m12, m21, m22, item1Num, item2Num, modus]);
-
-    m11 = itemMap.get(itemName);
-    m12 = itemMap2.get(itemName);
-    m21 = itemMap.get(itemName+"R");
-    m22 = itemMap2.get(itemName+"R");
-
-    let item1Num = m11 ? +m11 : ( m12 ? +m12 : 99)
-    let item2Num = m21 ? +m21 : ( m22 ? +m22 : 99)
-
-    let modus = modes[itemName];
-
-    /*
-    if (cmd[1] === "CROSSING" && cmd[0] == "toggle") {
-      if (status["CROSSING"] == "OFF") {
-        trainMode = CROSSING_DOWN;
-        trainValue = 255;
-        trainDuration = 70;
-        status["CROSSING"] = "ON";
-        sendI2C(I2C_TRAIN_ADDR, trainMode, 2, trainDuration, trainValue);
-      } else {
-        trainMode = CROSSING_UP;
-        trainValue = 255;
-        trainDuration = 70;
-        status["CROSSING"] = "OFF";
-        sendI2C(I2C_TRAIN_ADDR, trainMode, 2, trainDuration, trainValue);
-      }
-    }
-    */
-
-    if (cmd[0] === "toggle" && item1Num != 99) {
-      if (m11 && +m11 === item1Num) {
-          sendI2C(I2C_ADDR1,modus,item1Num,item2Num,0);
-      } else {
-          sendI2C(I2C_ADDR2,modus,item1Num,item2Num,0);
-      }
-    }
-
-    if (cmd[0] === "on" || (cmd[0] === "set" && cmd[2] === "ON")) {
-      if (m11 && +m11 === item1Num) {
-          sendI2C(I2C_ADDR1,1,item1Num,item2Num,0);
-      } else {
-          sendI2C(I2C_ADDR2,1,item1Num,item2Num,0);
-      }
-    }
-
-    if (cmd[0] === "off" || (cmd[0] === "set" && cmd[2] === "OFF")) {
-      if (m11 && +m11 === item1Num) {
-          sendI2C(I2C_ADDR1,0,item1Num,item2Num,0);
-      } else {
-          sendI2C(I2C_ADDR2,0,item1Num,item2Num,0);
-      }
-    }
-
-    if (cmd[0] === "info") {
-      statusSync(false, cmd[1]);
-    }
+  const item = itemsByName.get(itemName);
+  if (!item) return;
+  const paired = item.pairedItem ? itemsByName.get(item.pairedItem) : null;
+  let action;
+  if (cmd[0] === 'toggle') action = item.mode;
+  if (cmd[0] === 'on' || (cmd[0] === 'set' && cmd[2] === 'ON')) action = 1;
+  if (cmd[0] === 'off' || (cmd[0] === 'set' && cmd[2] === 'OFF')) action = 0;
+  if (action !== undefined) {
+    sendI2C(item.board.address, action, item.index, paired ? paired.index : 99, 0);
   }
 }
 
-// CONTROL
-
-statusSync = function(forceall, forceditem) {
-  if (forceditem === "CROSSING") {
-    sendMsg("state:"+forceditem+":"+status[forceditem]);
-  } else {
-
-  if (!forceditem || status[forceditem] != undefined) {
-   readI2C();
-   setTimeout( function() {
-    for (i = 0; i<17; i++) {
-      item = itemMap.revGet(i);
-      sold = status[item];
-      snew = rbuffer[i];
-      if (forceall || sold!=snew || forceditem===item) {
-          // console.log(" SEND STATE: "  + item + ":" + statusMap.get(snew) + ":" + i + ":" + sold + ":" + snew);
-          status[item] = snew;
-          sendMsg("state:" + item + ":" + statusMap.get(snew));
+// Publish only configured channels after their I2C reads complete.
+statusSync = async function(forceall, forceditem) {
+  if (forceditem === 'CROSSING') {
+    sendMsg('state:CROSSING:' + status.CROSSING);
+    return;
+  }
+  if (forceditem && !itemsByName.has(forceditem)) return;
+  await readI2C();
+  for (const board of boards) {
+    for (const [name, item] of Object.entries(board.items)) {
+      const next = board.buffer[item.index];
+      if (forceall || status[name] !== next || forceditem === name) {
+        status[name] = next;
+        sendMsg('state:' + name + ':' + (statusMap[next] || 'failed'));
       }
-
-      item2 = itemMap2.revGet(i);
-      sold2 = status[item2];
-      snew2 = rbuffer2[i];
-      if (forceall || sold2!=snew2 || forceditem===item2) {
-          // console.log(" SEND STATE: "  + item2 + ":" + statusMap.get(snew2) + ":" + i + ":" + sold2 + ":" + snew2);
-          status[item2] = snew2;
-          sendMsg("state:" + item2 + ":" + statusMap.get(snew2));
-      }
-
     }
-   }, 300);
   }
-  }
-}
+};
