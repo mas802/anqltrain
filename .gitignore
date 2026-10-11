@@ -46,4 +46,4 @@ archive/
 sh/install.sh
 doc/ARCH.txt
 sh/pic.sh
-node/test/wire.test.js
+node/test/*.test.js

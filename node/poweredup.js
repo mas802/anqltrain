@@ -3,6 +3,35 @@ const path = require('path');
 const configPath = path.resolve(__dirname, '..', 'config.json');
 let config = JSON.parse(fs.readFileSync(configPath));
 
+// Keep live devices and recovery state separate from the JSON settings.
+function createMotorConfig(settings) {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+    throw new Error('config.motorConfigs must be an object');
+  }
+  return Object.fromEntries(Object.entries(settings).map(([name, item]) => {
+    if (!item || !Number.isFinite(item.degrees) || !Number.isFinite(item.speed) ||
+        !['toggle', 'normal'].includes(item.mode) ||
+        (item.state !== undefined && !['ON', 'OFF'].includes(item.state))) {
+      throw new Error(`Invalid motor configuration for ${name}`);
+    }
+    return [name, {
+      label: name,
+      degrees: item.degrees,
+      speed: item.speed,
+      mode: item.mode,
+      state: item.state || 'OFF',
+      motor: null,
+      led: null,
+      hub: null,
+      port: null,
+      hubName: null,
+      recovering: null,
+    }];
+  }));
+}
+
+const motorConfig = createMotorConfig(config.motorConfigs);
+
 //
 // BOUNDARY Powered UP
 //
@@ -79,86 +108,6 @@ function releaseHubId(hubId) {
   activeHubs.delete(hubId);
 }
 
-let motorConfig = {
-"SWITCHFRONT" : {
-  label: "SWITCHFRONT",
-  motor: null,
-  state: "OFF",
-  degrees: 90,
-  speed: 120,
-  led: null,
-  mode: "toggle",
-  hub: null,
-  port: null,
-  hubName: null,
-  recovering: null
-},
-"SWITCHBACK" : {
-  label: "SWITCHBACK",
-  motor: null,
-  state: "OFF",
-  degrees: 90,
-  speed: 120,
-  led: null,
-  mode: "toggle",
-  hub: null,
-  port: null,
-  hubName: null,
-  recovering: null
-},
-"CONVEYOR" : {
-  label: "CONVEYOR",
-  motor: null,
-  state: "OFF",
-  degrees: 720,
-  speed: -80,
-  led: null,
-  mode: "normal",
-  hub: null,
-  port: null,
-  hubName: null,
-  recovering: null
-},
-"LOADEEMOTOR" : {
-  label: "LOADEEMOTOR",
-  motor: null,
-  state: "OFF",
-  degrees: 45,
-  speed: -20,
-  led: null,
-  mode: "toggle",
-  hub: null,
-  port: null,
-  hubName: null,
-  recovering: null
-},
-"DECOUPLERBACK" : {
-  label: "DECOUPLERBACK",
-  motor: null,
-  state: "OFF",
-  degrees: 160,
-  speed: 5,
-  led: null,
-  mode: "toggle",
-  hub: null,
-  port: null,
-  hubName: null,
-  recovering: null
-},
-"DECOUPLERFRONT" : {
-  label: "DECOUPLERFRONT",
-  motor: null,
-  state: "OFF",
-  degrees: 280,
-  speed: 5,
-  led: null,
-  mode: "toggle",
-  hub: null,
-  port: null,
-  hubName: null,
-  recovering: null
-}
-};
 
 async function registerMotorDevice(motorName, hub, port, hubled, hubname) {
   const entry = motorConfig[motorName];
@@ -352,8 +301,6 @@ poweredUP.on("discover", async (hub) => {
 
         hubled.setColor(PoweredUP.Consts.Color.GREEN);
 
-        await registerMotorDevice("SWITCHFRONT", hub, "C", hubled, hubname);
-        await registerMotorDevice("SWITCHBACK", hub, "A", hubled, hubname);
 
         let sensor = await hub.waitForDeviceByType(PoweredUP.Consts.DeviceType.COLOR_DISTANCE_SENSOR);
         sensor.setColor(PoweredUP.Consts.Color.WHITE);
@@ -371,9 +318,7 @@ poweredUP.on("discover", async (hub) => {
 
         hubled.setColor(PoweredUP.Consts.Color.RED);
 
-        await registerMotorDevice("DECOUPLERFRONT", hub, "A", hubled, hubname);
 
-        await registerMotorDevice("DECOUPLERBACK", hub, "B", hubled, hubname);
 
         hub.on("button", (device) => {
           buttonHandler(device, "DECOUPLER", PoweredUP.Consts.ButtonState.PRESSED);
@@ -473,7 +418,7 @@ function receiveMsg(message) {
      if (mconfig) {
         setMotor( mconfig, state);
      } else if (cmd[1] === "TRAINLED") {
-        if (motorConfig["DECOUPLERBACK"].led) {
+        if (motorConfig["DECOUPLERBACK"] && motorConfig["DECOUPLERBACK"].led) {
           motorConfig["DECOUPLERBACK"].led.setColor(PoweredUP.Consts.Color[state]);
         }
      }
